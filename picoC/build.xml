@@ -1,0 +1,108 @@
+<project name="PICO C" default="build" basedir=".">
+	<property name="tmp.dir"       location="tmp"/>
+	<property name="res.dir"       location="res"/>
+	<property name="tools.dir"     location="tools"/>
+
+	<taskdef name="jflex" classname="jflex.anttask.JFlexTask"
+		classpath="${tools.dir}/jflex-1.6.1.jar"/>
+
+	<taskdef name="beaver" classname="beaver.comp.run.AntTask"
+		classpath="${tools.dir}/beaver-ant.jar"/>
+
+	<taskdef name="jastadd" classname="org.jastadd.JastAddTask"
+		classpath="${tools.dir}/jastadd2.jar"/>
+
+	<target name="build" depends="scanner, parser, jastadd">
+		<javac
+			encoding="utf8"
+			destdir="."
+			nowarn="true"
+			classpath = "${tools.dir}/beaver-rt.jar"	
+			includeantruntime="true">
+			<src path="."/>
+		</javac>
+	</target>
+
+	<target name="jastadd">
+		<jastadd
+			package="AST"
+			rewrite="true"
+			beaver="true"
+			visitCheck="false"
+			cacheCycle="false"
+			outdir="."
+			>
+			<fileset dir="grammar">
+				<include name="*.ast"/>
+				<include name="*.jadd"/>
+			</fileset>
+		</jastadd>
+	</target>
+
+	<target name="scanner">
+		<mkdir dir="${tmp.dir}/scanner"/>
+		<concat destfile="${tmp.dir}/scanner/JavaScanner.flex"
+			binary="true" force="false">
+			<!-- Order is important. -->
+			<filelist dir="scanner">
+				<file name="Header.flex"/>
+				<file name="Preamble.flex"/>
+				<file name="Macros.flex"/>
+				<file name="RulesPreamble.flex"/>
+				<file name="WhiteSpace.flex"/>
+				<file name="Comments.flex"/>
+				<file name="Keywords.flex"/>
+				<file name="Literals.flex"/>
+				<file name="Separators.flex"/>
+				<file name="Operators.flex"/>
+				<file name="Identifiers.flex"/>
+				<file name="Postamble.flex"/>
+			</filelist>
+		</concat>
+		<jflex file="${tmp.dir}/scanner/JavaScanner.flex"
+			outdir="AST" nobak="yes"/>
+	</target>
+
+	<target name="parser">
+		<mkdir dir="${tmp.dir}/parser"/>
+		<java classname="Main" fork="true">
+			<classpath>
+				<pathelement path="${tools.dir}/JastAddParser.jar"/>
+				<pathelement path="${tools.dir}/beaver-rt.jar"/>
+			</classpath>
+			<arg value="parser/picoC.parser"/>
+			<arg value="${tmp.dir}/parser/PicoCParser.beaver"/>
+		</java>
+		<beaver file="${tmp.dir}/parser/PicoCParser.beaver"
+			destdir="AST"
+			terminalNames="yes"
+			compress="no"
+			useSwitch="yes"/>
+	</target>
+	<target name="doc" depends="build">
+		<mkdir dir="doc"/>
+		<javadoc
+				destdir="doc"
+				classpath=".:${tools.dir}/beaver-ant.jar"
+				sourcepath="."
+				packagenames="AST"
+				docletpath="${tools.dir}/RagDoll.jar"
+				doclet="ragdoll.RagDollDoclet">
+			<arg value="-linksource"/>
+			<arg value="-ragroot"/>
+			<arg value="."/>
+		</javadoc>
+	</target>
+	<target name="clean">
+		<delete dir="AST"/>
+		<delete dir="doc"/>
+		<delete dir="${tmp.dir}"/>
+		<delete dir="${src.dir}"/>
+		<delete>
+			<fileset dir="." includes="*.class"/>
+		</delete>
+	</target>
+
+
+</project>
+

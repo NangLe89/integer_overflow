@@ -1,0 +1,177 @@
+%header {: // Generated from WHILE.parser
+
+ package AST;
+ import java.io.*;
+ import utility.LabelUtility;
+ :};
+%embed {: // Generated from WHILE.parser
+
+  /** Syntax error exceptions. */
+  public class ParseException extends RuntimeException {
+  	public ParseException(String msg) { super(msg); }
+  }
+  
+  /** Error handling adapter for using Beaver from JastAdd. */
+  class Events extends Parser.Events {
+    public void syntaxError(Symbol token) {
+      StringBuffer s = new StringBuffer();
+      s.append("line: " + token.getLine(token.getStart()) + " char: " + token.getColumn(token.getStart()) + "\n");
+      s.append("  *** Syntactic error: unexpected token " + Terminals.NAMES[token.getId()]);
+      throw new ParseException(s.toString());
+    }
+    public void scannerError(Scanner.Exception e) {
+      StringBuffer s = new StringBuffer();
+      s.append("line: " + e.line + " char: " + e.column + "\n");
+      s.append("  *** Lexical error: " + e.getMessage());
+      throw new ParseException(s.toString());
+    }
+  }
+
+  { LabelUtility.reset(); 
+    report = new Events(); // Use error handler in parser
+  }
+  
+  public Program parse(java.io.InputStream is, String fileName) throws java.io.IOException, beaver.Parser.Exception {
+     Program prog;
+     // errors = new ArrayList();
+     try {
+       WHILEScanner scanner = new WHILEScanner(new BufferedReader(new InputStreamReader(is)));
+       prog = (Program)parse(scanner);
+     } catch(ParseException e) {
+       // build empty program for failed error recovery
+       prog = new Program();
+     } catch(Error e) {
+       prog = new Program();
+       // errors.add(new Problem(null, e.getMessage(), 0, 0, Problem.Severity.ERROR, Problem.Kind.LEXICAL));
+     }
+     // for(java.util.Iterator iter = errors.iterator(); iter.hasNext(); ) {
+     //   Problem p = (Problem)iter.next();
+     //   p.setFileName(fileName);
+     //   prog.addParseError(p);
+     // }
+     return prog;
+   }
+   // protected java.util.Collection errors = new ArrayList();
+  
+:};
+%terminals RBRACE;
+%terminals WHILE;
+%terminals OPMUL;
+%terminals ELSE;
+%terminals LBRACE;
+%terminals NUMBER;
+%terminals DO;
+%terminals SEMICOLON;
+%terminals NOT;
+%terminals AND;
+%terminals TRUE;
+%terminals ASSERT;
+%terminals PRINT;
+%terminals LPAREN;
+%terminals OPPLUS;
+%terminals IF;
+%terminals SKIP;
+%terminals RPAREN;
+%terminals THEN;
+%terminals READ;
+%terminals IDENTIFIER;
+%terminals OR;
+%terminals ASSIGN;
+%terminals OPRELATIONAL;
+%terminals SANITIZE;
+%terminals OPMINUS;
+%terminals FALSE;
+%typeof expression = "Expr";
+%typeof aexpression = "Expr";
+%typeof blockStmtList = "List";
+%typeof relexp = "Expr";
+%typeof conj = "Expr";
+%typeof primary = "Expr";
+%typeof stmt = "S";
+%typeof block = "S";
+%typeof factor = "Expr";
+%typeof goal = "Program";
+%goal goal;
+goal =
+    block.block {:  return new Program(block); :}
+  ;
+
+block =
+    LBRACE.LBRACE blockStmtList.blockStmtList RBRACE.RBRACE {:  return new CompoundS(blockStmtList); :}
+  ;
+
+blockStmtList =
+    stmt.stmt {:  return new List().add(stmt); :}
+
+  | blockStmtList.blockStmtList SEMICOLON.SEMICOLON stmt.stmt {:  return blockStmtList.add(stmt); :}
+  ;
+
+stmt =
+    IDENTIFIER.IDENTIFIER ASSIGN.ASSIGN expression.e {:  return new AssignS(new NumLabel(LabelUtility.nextLabel()), ((String)IDENTIFIER.value), e); :}
+
+  | SKIP.SKIP {:  return new SkipS(new NumLabel(LabelUtility.nextLabel())); :}
+
+  | block.block {:  return block; :}
+
+  | IF.IF expression.be THEN.THEN block.b ELSE.ELSE block.c {:  return new IfS(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be), b, c); :}
+
+  | WHILE.WHILE expression.be DO.DO block.block {:  return new WhileS(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be), block); :}
+  ;
+
+primary =
+    IDENTIFIER.IDENTIFIER {:  return new VarRefExpr(((String)IDENTIFIER.value)); :}
+
+  | NUMBER.NUMBER {:  return new NumLitExpr(((String)NUMBER.value)); :}
+
+  | TRUE.TRUE {:  return new BoolLitExpr(((String)TRUE.value)); :}
+
+  | FALSE.FALSE {:  return new BoolLitExpr(((String)FALSE.value)); :}
+
+  | NOT.NOT primary.e {:  return new NotExpr(e); :}
+
+  | LPAREN.LPAREN expression.e RPAREN.RPAREN {:  return e; :}
+  ;
+
+factor =
+    primary.p {:  return p; :}
+
+  | factor.l OPMUL.OPMUL primary.r {:  return new ABinaryExpr(l, new Op_a(((String)OPMUL.value)), r); :}
+  ;
+
+aexpression =
+    factor.f {:  return f; :}
+
+  | aexpression.l OPPLUS.OPPLUS factor.r {:  return new ABinaryExpr(l, new Op_a(((String)OPPLUS.value)), r); :}
+
+  | aexpression.l OPMINUS.OPMINUS factor.r {:  return new ABinaryExpr(l, new Op_a(((String)OPMINUS.value)), r); :}
+  ;
+
+relexp =
+    aexpression.aexpression 
+  | aexpression.l OPRELATIONAL.OPRELATIONAL aexpression.r {:  return new RelExpr(l, new Op_r(((String)OPRELATIONAL.value)), r); :}
+  ;
+
+conj =
+    relexp.re {:  return re; :}
+
+  | conj.l AND.AND relexp.r {:  return new LogicExpr(l, new Op_b(((String)AND.value)), r); :}
+  ;
+
+expression =
+    conj.c {:  return c; :}
+
+  | expression.l OR.OR conj.r {:  return new LogicExpr(l, new Op_b(((String)OR.value)), r); :}
+  ;
+
+stmt =
+    ASSERT.ASSERT expression.be {:  return new AssertS(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be)); :}
+  ;
+
+stmt =
+    READ.READ IDENTIFIER.IDENTIFIER {:  return new ReadS(new NumLabel(LabelUtility.nextLabel()), ((String)IDENTIFIER.value)); :}
+
+  | SANITIZE.SANITIZE IDENTIFIER.IDENTIFIER {:  return new SanitizeS(new NumLabel(LabelUtility.nextLabel()), ((String)IDENTIFIER.value)); :}
+
+  | PRINT.PRINT expression.e {:  return new PrintS(new NumLabel(LabelUtility.nextLabel()), e); :}
+  ;
+

@@ -1,0 +1,6 @@
+import java.util.Collection;
+import utility.SetRepUtility;
+
+aspect Errors {
+  coll Collection<String> Program.errors() [SetRepUtility.emptySet()] with add;
+}

@@ -1,0 +1,56 @@
+import java.util.Set;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+/** The Very Busy Expressions Analysis.
+    See Nielsen, Nielsen, and Hankin,
+    Principles of Program Analysis, section 2.1.3.
+    See also AExp.jrag for helping attributes.
+    */
+aspect VB {
+       /** The kill function for very busy expressions. */
+       syn Set<Expr> Block.killVB(Set<Expr> current);
+       eq AssignS.killVB(Set<Expr> current) {
+		Set<Expr> ret = SetRepUtility.emptySet();
+		String assigned_var = getVar();
+		for (Expr exp : current)
+		{
+			if (exp.FV().contains(assigned_var)) 
+			ret.add(exp);
+		}
+		return ret;
+	}
+	eq SkipS.killVB(Set<Expr> current) = SetRepUtility.emptySet();
+	eq LabeledExpr.killVB(Set<Expr> current) = SetRepUtility.emptySet();
+  
+	/** The gen function for very busy expressions. */
+	syn Set<Expr> Block.genVB();
+	eq AssignS.genVB() = getExpr().Aexps();
+	eq SkipS.genVB() = SetRepUtility.emptySet();
+	eq LabeledExpr.genVB() = this.Aexps();
+	
+	/** Compute the exit information for the VB analysis. */
+	syn Set<Expr> Block.VBexit() circular [AexpStar()];
+        eq Block.VBexit() {
+		Set<Expr> ret = SetRepUtility.emptySet(); // a fresh set!
+		if (!progFinals().contains(getLabelAST())) {
+		   Set<Expr> out = SetRepUtility.emptySet();
+		   for (Label lab : this.outFlows()) {
+		       out.addAll(lab.itsBlock().VBentry());
+		   }
+		   ret.retainAll(out);
+		}
+		return ret;
+	}
+	
+	/** Compute the entry information for the VB analysis. */
+	syn Set<Expr> Block.VBentry() circular [AexpStar()];
+        eq Block.VBentry() {
+	        Set<Expr> ret = SetRepUtility.emptySet(); // a fresh set!
+		ret.addAll(this.VBexit());
+		ret.removeAll(this.killVB(ret));
+		ret.addAll(this.genVB());
+		return ret;
+	}
+}

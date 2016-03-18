@@ -1,0 +1,93 @@
+import utility.Type;
+import utility.PositionMessage;
+import java.util.Map;
+import java.util.HashMap;
+
+aspect TypeInference {
+	// Broadcast the typeEnv to all AST nodes
+	eq Program.getS().typeEnv() {
+		Map<String,Type> tenv = new HashMap<String,Type>();
+		for (String v : this.FV()) {
+			tenv.put(v, Type.Int);  // assume all variables are of type Int
+		}
+		return tenv;
+	}
+	inh Map<String,Type> Expr.typeEnv();
+	
+	syn Type Expr.type();
+	eq NumLitExpr.type() = Type.Int;
+	eq BoolLitExpr.type() = Type.Bool;
+	eq VarRefExpr.type() = typeEnv().get(getContents());
+	ABinaryExpr 
+	  contributes (PositionMessage.posInfo(getLeft())
+	  			  + ": left operand of `" + getOp().unparse() + "' (" 
+	  			  + getLeft().unparse()
+			      + ") is not of type Int")
+      when getLeft().type() != Type.Int
+      to Program.errors() for progAST();
+	ABinaryExpr 
+	  contributes (PositionMessage.posInfo(getRight()) 
+	  			  + ": right operand of `" + getOp().unparse() + "' (" 
+	  			  + getRight().unparse()
+			      + ") is not of type Int")
+      when getRight().type() != Type.Int
+      to Program.errors() for progAST();     
+	eq ABinaryExpr.type() = Type.Int;		
+
+	NotExpr 
+	  contributes (PositionMessage.posInfo(getExpr()) 
+	  			  + ": operand of `not' " + " (" 
+	  			  + getExpr().unparse()
+			      + ") is not of type Bool")
+      when getExpr().type() != Type.Bool
+      to Program.errors() for progAST();
+	eq NotExpr.type() = Type.Bool;
+
+	LogicExpr 
+	  contributes (PositionMessage.posInfo(getLeft()) 
+	  			  + ": left operand of `" + getOp().unparse() + "' (" 
+	  			  + getLeft().unparse()
+			      + ") is not of type Bool")
+      when getLeft().type() != Type.Bool
+      to Program.errors() for progAST();
+	LogicExpr 
+	  contributes (PositionMessage.posInfo(getRight()) 
+	  			  + ": right operand of `" + getOp().unparse() + "' (" 
+	  			  + getRight().unparse()
+			      + ") is not of type Bool")
+      when getRight().type() != Type.Bool
+      to Program.errors() for progAST();	
+	eq LogicExpr.type() = Type.Bool;
+
+	RelExpr 
+	  contributes (PositionMessage.posInfo(getLeft()) 
+	  			  + ": left operand of `" + getOp().unparse() + "' (" 
+	  			  + getLeft().unparse()
+			      + ") is not of type Int")
+      when getLeft().type() != Type.Int
+      to Program.errors() for progAST();
+	RelExpr 
+	  contributes (PositionMessage.posInfo(getRight()) 
+	  			  + ": right operand of `" + getOp().unparse() + "' (" 
+	  			  + getRight().unparse()
+			      + ") is not of type Int")
+      when getRight().type() != Type.Int
+      to Program.errors() for progAST();	
+	eq RelExpr.type() = Type.Bool;		
+	
+	eq LabeledExpr.type() = getExpr().type();
+	
+	IfS
+	  contributes (PositionMessage.posInfo(getLabeledExpr().getExpr())
+	  			+ ": test in `if' " + getLabeledExpr().getExpr().unparse()
+	  			+ " is not of type Bool")
+	  when getLabeledExpr().type() != Type.Bool
+	  to Program.errors() for progAST();
+		
+	WhileS
+	  contributes (PositionMessage.posInfo(getLabeledExpr().getExpr())
+	  			+ ": test in `while' " + getLabeledExpr().getExpr().unparse()
+	  			+ " is not of type Bool")
+	  when getLabeledExpr().type() != Type.Bool
+	  to Program.errors() for progAST();
+}

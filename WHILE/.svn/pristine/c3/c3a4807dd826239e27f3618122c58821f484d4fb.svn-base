@@ -1,0 +1,30 @@
+import java.util.Map;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+aspect RDTaint {
+	/** The kill function for reaching definitions. */
+	// syn Set<Map.Entry> Block.killRD();
+	eq ReadS.killRD() {
+		Set<Map.Entry> ret = SetRepUtility.crossWith(getVar(), SetRepUtility.singleton(new NumLabel("?")));
+		ret.addAll(SetRepUtility.crossWith(getVar(), progLabels()));
+		return ret;
+        }
+	eq SanitizeS.killRD() {
+		Set<Map.Entry> ret = SetRepUtility.crossWith(getVar(), SetRepUtility.singleton(new NumLabel("?")));
+		ret.addAll(SetRepUtility.crossWith(getVar(), progLabels()));
+		return ret;
+        }
+        eq PrintS.killRD() = SetRepUtility.emptySet();
+	
+	/** The gen function for reaching definitions. */
+	// syn Set<Map.Entry> Block.genRD();
+	eq ReadS.genRD() 
+	 = SetRepUtility.singleton(
+	         new Pair<String,Label>(getVar(), getLabelAST()));
+ 	eq SanitizeS.genRD() 
+	 = SetRepUtility.singleton(
+	         new Pair<String,Label>(getVar(), getLabelAST()));
+	eq PrintS.genRD() = SetRepUtility.emptySet();
+}

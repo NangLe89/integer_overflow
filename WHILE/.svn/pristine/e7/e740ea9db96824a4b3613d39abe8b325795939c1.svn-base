@@ -1,0 +1,51 @@
+import java.util.Set;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+/** The Available Expressions Analysis. */
+aspect AETaint {
+	/** The kill function for available expressions. */
+	// syn Set<Expr> Block.killAE(Set<Expr> current);
+	eq ReadS.killAE(Set<Expr> current) {
+	   Set<Expr> ret = SetRepUtility.emptySet();
+	   String read_var = getVar();
+	   for (Expr exp : current) {
+		if (exp.FV().contains(read_var)) {
+		   ret.add(exp);
+		}
+	   }
+	   return ret;
+    	}
+	eq SanitizeS.killAE(Set<Expr> current) {
+	   Set<Expr> ret = SetRepUtility.emptySet();
+	   String s_var = getVar();  // the value of the var may be changed
+	   for (Expr exp : current) {
+		if (exp.FV().contains(s_var)) {
+		   ret.add(exp);
+		}
+	   }
+	   return ret;
+    	}
+	eq PrintS.killAE(Set<Expr> current) = SetRepUtility.emptySet();
+
+	/** The set of non-trivial arithmetic expressions in an AST node. */
+	// syn Set<Expr> S.Aexps();
+	eq ReadS.Aexps() = SetRepUtility.emptySet();
+	eq SanitizeS.Aexps() = SetRepUtility.emptySet();
+	eq PrintS.Aexps() = getExpr().Aexps();
+
+	/** The gen function for available expressions. */
+	// syn Set<Expr> Block.genAE();
+	eq ReadS.genAE() = SetRepUtility.emptySet();
+	eq SanitizeS.genAE() = SetRepUtility.emptySet();
+	eq PrintS.genAE() {
+		Set<Expr> ret = SetRepUtility.emptySet();
+		Expr exp = getExpr();
+		if (exp.nontrivial()) {
+			ret.add(exp);
+		}
+		return ret;
+	}
+
+}

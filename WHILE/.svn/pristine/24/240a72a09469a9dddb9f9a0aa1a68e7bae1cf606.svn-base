@@ -1,0 +1,96 @@
+import java.util.Set;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+/** Attributes for non-trivial arithmetic expressions.
+    See Nielsen, Nielsen, and Hankin,
+    Principles of Program Analysis, section 2.1.1.
+    Also defininitions of .equals and .hashCode for expressions.
+    */
+aspect AExp {
+    /** Is this expression a non-trivial arithmetic expression? */
+    syn boolean Expr.nontrivial();
+    eq VarRefExpr.nontrivial() = false;
+    eq NumLitExpr.nontrivial() = false;
+    eq ABinaryExpr.nontrivial() = true;
+    eq BoolLitExpr.nontrivial() = false;
+    eq NotExpr.nontrivial() = false;
+    eq LogicExpr.nontrivial() = false;
+    eq RelExpr.nontrivial() = false;
+    eq LabeledExpr.nontrivial() = getExpr().nontrivial();
+	
+    /** The set of non-trivial arithmetic expressions in a statement. */
+    syn Set<Expr> Program.Aexps();
+    eq Program.Aexps() = getS().Aexps();
+    syn Set<Expr> S.Aexps();
+    eq AssignS.Aexps() = getExpr().Aexps();
+    eq SkipS.Aexps() = SetRepUtility.emptySet();
+    eq IfS.Aexps() {
+          Set<Expr> ret = getLabeledExpr().Aexps();
+          ret.addAll(getS1().Aexps());
+          ret.addAll(getS2().Aexps());
+          return ret;
+       }
+    eq WhileS.Aexps() {
+          Set<Expr> ret = getLabeledExpr().Aexps();
+          ret.addAll(getS().Aexps());
+          return ret;
+       }
+    eq CompoundS.Aexps() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          for (int i =0; i < getNumSList(); i++) {
+             ret.addAll(getSList(i).Aexps());
+          }
+          return ret;
+       }
+       
+    /** The set of non-trivial arithmetic expressions in an expression. */
+    syn Set<Expr> Expr.Aexps();
+    eq VarRefExpr.Aexps() = SetRepUtility.emptySet();
+    eq NumLitExpr.Aexps() = SetRepUtility.emptySet();
+    eq ABinaryExpr.Aexps() {
+          Set<Expr> ret = SetRepUtility.singleton(this);
+          ret.addAll(getLeft().Aexps());
+          ret.addAll(getRight().Aexps());
+          return ret;
+       }
+    eq BoolLitExpr.Aexps() = SetRepUtility.emptySet();
+    eq NotExpr.Aexps() = getExpr().Aexps();
+    eq LogicExpr.Aexps() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          ret.addAll(getLeft().Aexps());
+          ret.addAll(getRight().Aexps());
+          return ret;
+       }
+    eq RelExpr.Aexps() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          ret.addAll(getLeft().Aexps());
+          ret.addAll(getRight().Aexps());
+          return ret;
+       }
+    eq LabeledExpr.Aexps() = getExpr().Aexps();
+
+    /** The set of non-trivial expressions in the program. */
+    syn Set<Expr> Program.AexpStar();
+    eq Program.AexpStar() = getS().Aexps();
+
+    /** The set of non-trivial expressions in the program 
+     *  is broadcast to all blocks. */
+    inh Set<Expr> S.AexpStar();
+    eq Program.getS().AexpStar() = getS().Aexps();
+
+    inh Set<Expr> Block.AexpStar();
+                                
+    // the following are needed so that Exprs can be hashed...
+    /** Are these Exprs equal? */
+    public boolean Expr.equals(Object oth) {
+       if (oth == null || !(oth instanceof Expr)) { return false; }
+       Expr e = (Expr) oth;
+       return unparse().equals(e.unparse());
+    }
+    /** Return the hash code for this Expr. */
+    public int Expr.hashCode() {
+       return unparse().hashCode();
+    }
+}

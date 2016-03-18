@@ -1,0 +1,9 @@
+// Free Variables analysis
+
+import java.util.Set;
+import utility.SetRepUtility;
+
+aspect FreeVarsAssert {
+        // syn Set<String> S.FV();
+	eq AssertS.FV() = getLabeledExpr().FV();
+}

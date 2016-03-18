@@ -1,0 +1,11 @@
+import java.util.Set;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+/** The Available Expressions Analysis. */
+aspect AEAssert {
+	/** The set of non-trivial arithmetic expressions in an AST node. */
+	// syn Set<Expr> S.Aexps();
+	eq AssertS.Aexps() = getLabeledExpr().Aexps();
+}

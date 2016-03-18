@@ -1,0 +1,5 @@
+aspect UnparseAssert {
+	eq AssertS.unparse() {
+		return "assert " + getLabeledExpr().unparse();
+	}
+}

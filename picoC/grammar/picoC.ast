@@ -1,0 +1,118 @@
+Program ::= Block;
+
+abstract Stmt;
+IfStmt : Stmt ::= Condition:Expr Then:Stmt [Else:Stmt];
+ExprStmt : Stmt ::= Expr;
+ReturnStmt : Stmt ::= [Result:Expr];
+ContinueStmt : Stmt ::= <Label:String>;
+BreakStmt : Stmt ::= <Label:String>;
+EmptyStmt : Stmt;
+Block : Stmt ::= Stmt*;
+VarDeclStmt : Stmt ::= TypeAccess:Access <ID:String>;
+
+// Branch Target Statement: a statement that can be reached by break or continue
+abstract BranchTargetStmt : Stmt; 
+ForStmt : BranchTargetStmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* Stmt;
+WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
+LabeledStmt : BranchTargetStmt ::= <Label:String> Stmt;
+DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
+SwitchStmt : BranchTargetStmt ::= Expr Block;
+
+abstract Case : Stmt;
+ConstCase : Case ::= Value:Expr;
+DefaultCase : Case;
+
+abstract Expr;
+
+// Assignment expressions: <dest> = <source>, <dest> += <source>, <dest> -= <source>, etc.
+abstract AssignExpr : Expr ::= Dest:Expr Source:Expr;
+
+AssignSimpleExpr : AssignExpr;
+
+abstract AssignAdditiveExpr : AssignExpr;
+AssignPlusExpr : AssignAdditiveExpr ;
+AssignMinusExpr : AssignAdditiveExpr ;
+
+abstract AssignMultiplicativeExpr : AssignExpr;
+AssignMulExpr : AssignMultiplicativeExpr ;
+AssignDivExpr : AssignMultiplicativeExpr ;
+AssignModExpr : AssignMultiplicativeExpr ;
+
+abstract AssignShiftExpr : AssignExpr;
+AssignLShiftExpr : AssignShiftExpr ;
+AssignRShiftExpr : AssignShiftExpr ;
+
+abstract AssignBitwiseExpr : AssignExpr;
+AssignAndExpr : AssignBitwiseExpr ;
+AssignXorExpr : AssignBitwiseExpr ;
+AssignOrExpr : AssignBitwiseExpr ;
+
+// Binary expressions, i.e. <LeftOperand> + <RightOperand>, <LeftOperand> && <RightOperand>, etc.
+abstract Binary : Expr ::= LeftOperand:Expr RightOperand:Expr;
+
+abstract ArithmeticExpr : Binary;
+abstract MultiplicativeExpr : ArithmeticExpr;
+MulExpr : MultiplicativeExpr ;
+DivExpr : MultiplicativeExpr ;
+ModExpr : MultiplicativeExpr ;
+abstract AdditiveExpr : ArithmeticExpr;
+AddExpr : AdditiveExpr ;
+SubExpr : AdditiveExpr ;
+
+abstract ShiftExpr : Binary;
+LShiftExpr : ShiftExpr ;
+RShiftExpr : ShiftExpr ;
+
+abstract RelationalExpr : Binary;
+LTExpr : RelationalExpr ;
+GTExpr : RelationalExpr ;
+LEExpr : RelationalExpr ;
+GEExpr : RelationalExpr ;
+
+abstract EqualityExpr : RelationalExpr;
+EQExpr : EqualityExpr ;
+NEExpr : EqualityExpr ;
+
+abstract BitwiseExpr : Binary;
+AndBitwiseExpr : BitwiseExpr ;
+OrBitwiseExpr : BitwiseExpr ;
+XorBitwiseExpr : BitwiseExpr ;
+
+abstract LogicalExpr : Binary;
+AndLogicalExpr : LogicalExpr ;
+OrLogicalExpr : LogicalExpr ;
+
+// End binary expressions
+
+// Unary expressions: e.g.<operand>++, --<operand>, -<operand>, !<operand>, etc.
+abstract Unary : Expr ::= Operand:Expr;
+BitNotExpr : Unary ;
+LogNotExpr : Unary ;
+MinusExpr : Unary ;
+PlusExpr : Unary ;
+PreIncExpr : Unary ;
+PreDecExpr : Unary ;
+abstract PostfixExpr : Unary;
+PostIncExpr : PostfixExpr ;
+PostDecExpr : PostfixExpr ;
+
+// End unary expressions
+
+//Literals, i.e. numbers, variable names, strings, etc.
+abstract PrimaryExpr : Expr;
+abstract Literal : PrimaryExpr ::= <LITERAL:String>;
+CharacterLiteral : Literal ;
+StringLiteral : Literal ;
+IntegerLiteral : Literal ;
+LongLiteral : Literal ;
+FloatingPointLiteral : Literal ;
+DoubleLiteral : Literal ;
+
+// Access expressions (whatever that means)
+abstract Access : Expr ::= <ID:String>;
+TypeAccess : Access;
+PrimitiveTypeAccess : TypeAccess;
+ParseName : Access;
+
+// Last but not least, the ternary operator.
+ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr FalseExpr:Expr;
