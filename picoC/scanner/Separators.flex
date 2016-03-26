@@ -5,6 +5,6 @@
   "{"   { return sym(Terminals.LBRACE); }
   "}"   { return sym(Terminals.RBRACE); }
   ";"   { return sym(Terminals.SEMICOLON); }
-  ","   { return sym(Terminals.COMMA); }
+//  ","   { return sym(Terminals.COMMA); }
 }
 

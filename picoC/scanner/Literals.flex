@@ -1,3 +1,4 @@
+/*
 /* 3.10 Literals */
 <YYINITIAL> {
   /* 3.10.1 Integer Literals */
@@ -71,4 +72,4 @@
   {LineTerminator}               { error("unterminated string at end of line"); }
 }
 
-
+*/

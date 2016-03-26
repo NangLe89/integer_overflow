@@ -1,0 +1,154 @@
+%header {: // Generated from parser/picoC.parser
+package AST;
+import AST.*;
+import utility.LabelUtility; :};
+%left LPAREN, RPAREN;
+%left MULT, DIV, MOD;
+%left PLUS, MINUS;
+%left LT, GT, LTEQ, GTEQ;
+%left EQEQ, NOTEQ;
+%left AND;
+%left XOR;
+%left OR;
+%terminals LBRACE;
+%terminals RBRACE;
+%terminals IDENTIFIER;
+%terminals ASSIGN;
+%terminals SKIP;
+%terminals WHILE;
+%terminals DO;
+%terminals SEMICOLON;
+%terminals FOR;
+%terminals LPAREN;
+%terminals RPAREN;
+%terminals IF;
+%terminals ELSE;
+%terminals NUMBER;
+%terminals TRUE;
+%terminals FALSE;
+%terminals NOT;
+%terminals EQ;
+%terminals MULT;
+%terminals DIV;
+%terminals MOD;
+%terminals PLUS;
+%terminals MINUS;
+%terminals EQEQ;
+%terminals NOTEQ;
+%terminals LT;
+%terminals GT;
+%terminals LTEQ;
+%terminals GTEQ;
+%terminals AND;
+%terminals XOR;
+%terminals OR;
+%typeof goal = "Program";
+%typeof simplefact_exp = "Expr";
+%typeof expression = "Expr";
+%typeof simpleae = "Expr";
+%typeof if_then_statement = "IfStmt";
+%typeof relexp = "Expr";
+%typeof exclusive_or_expression = "Expr";
+%typeof and_expression = "Expr";
+%typeof statement = "Stmt";
+%typeof block = "Stmt";
+%typeof for_stmt = "ForStmt";
+%typeof block_statements = "List";
+%typeof if_then_else_statement = "IfStmt";
+%typeof primary = "Expr";
+%goal goal;
+goal =
+    block.block {: return new Program(block); :}
+  ;
+block =
+    LBRACE.LBRACE block_statements.l RBRACE.RBRACE {: return new CompoundS(l); :}
+  ;
+block_statements =
+    statement.s {: return new List().add(s); :}
+
+  | block_statements.l statement.s {: return l.add(s); :}
+  ;
+statement =
+    IDENTIFIER.IDENTIFIER ASSIGN.ASSIGN expression.e {: return new AssignStmt(new NumLabel(LabelUtility.nextLabel()), IDENTIFIER, e); :}
+
+  | SKIP.SKIP {: return new SkipStmt(new NumLabel(LabelUtility.nextLabel()), SKIP); :}
+
+  | block.block {: return block; :}
+
+  | if_then_else_statement.if_then_else_statement 
+  | if_then_statement.if_then_statement 
+  | WHILE.WHILE expression.be DO.DO block.block {: return new WhileStmt(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be), block); :}
+
+  | for_stmt.for_stmt 
+  | SEMICOLON.SEMICOLON {: return new EmptyStmt(); :}
+  ;
+for_stmt =
+    FOR.FOR LPAREN.LPAREN block_statements.i SEMICOLON.SEMICOLON expression.e SEMICOLON.SEMICOLON_ block_statements.u RPAREN.RPAREN block.s {: return new ForStmt(i, new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), e), u, s); :}
+  ;
+if_then_else_statement =
+    IF.IF LPAREN.LPAREN expression.e RPAREN.RPAREN statement.t SEMICOLON.SEMICOLON ELSE.ELSE statement.els {: return new IfStmt(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), e), t, new Opt(els)); :}
+  ;
+if_then_statement =
+    IF.IF LPAREN.LPAREN expression.e RPAREN.RPAREN statement.s {: return new IfStmt(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), e), s, new Opt()); :}
+  ;
+primary =
+    IDENTIFIER.IDENTIFIER {: return new VarRefExpr(IDENTIFIER); :}
+
+  | NUMBER.NUMBER {: return new NumLitExpr(NUMBER); :}
+
+  | TRUE.TRUE {: return new BoolLitExpr(TRUE); :}
+
+  | FALSE.FALSE {: return new BoolLitExpr(FALSE); :}
+
+  | NOT.NOT primary.e {: return new NotExpr(e); :}
+
+  | LPAREN.LPAREN expression.e RPAREN.RPAREN {: return e; :}
+  ;
+simplefact_exp =
+    primary.p {: return p; :}
+
+  | simplefact_exp.s EQ.EQ primary.p {: return new ABinaryExpr(s, new Op_arth(EQ), p); :}
+
+  | simplefact_exp.s MULT.MULT primary.p {: return new ABinaryExpr(s, new Op_arth(MULT), p); :}
+
+  | simplefact_exp.s DIV.DIV primary.p {: return new ABinaryExpr(s, new Op_arth(DIV), p); :}
+
+  | simplefact_exp.s MOD.MOD primary.p {: return new ABinaryExpr(s, new Op_arth(MOD), p); :}
+  ;
+simpleae =
+    simplefact_exp.se {: return se; :}
+
+  | simpleae.a PLUS.PLUS simplefact_exp.s {: return new ABinaryExpr(a, new Op_arth(PLUS), s); :}
+
+  | simpleae.a MINUS.MINUS simplefact_exp.s {: return new ABinaryExpr(a, new Op_arth(MINUS), s); :}
+  ;
+relexp =
+    simpleae.s {: return s; :}
+
+  | simpleae.a EQEQ.EQEQ simpleae.b {: return new RelExpr(a, new Op_rel(EQEQ), b); :}
+
+  | simpleae.a NOTEQ.NOTEQ simpleae.b {: return new RelExpr(a, new Op_rel(NOTEQ), b); :}
+
+  | simpleae.a LT.LT simpleae.b {: return new RelExpr(a, new Op_rel(LT), b); :}
+
+  | simpleae.a GT.GT simpleae.b {: return new RelExpr(a, new Op_rel(GT), b); :}
+
+  | simpleae.a LTEQ.LTEQ simpleae.b {: return new RelExpr(a, new Op_rel(LTEQ), b); :}
+
+  | simpleae.a GTEQ.GTEQ simpleae.b {: return new RelExpr(a, new Op_rel(GTEQ), b); :}
+  ;
+and_expression =
+    relexp.re {: return re; :}
+
+  | and_expression.e AND.AND relexp.r {: return new LogicExpr(e, new Op_bool(AND), r); :}
+  ;
+exclusive_or_expression =
+    and_expression.ae {: return ae; :}
+
+  | exclusive_or_expression.e XOR.XOR and_expression.a {: return new LogicExpr(e, new Op_bool(XOR), a); :}
+  ;
+expression =
+    exclusive_or_expression.ee {: return ee; :}
+
+  | expression.ie OR.OR exclusive_or_expression.ee {: return new LogicExpr(ie, new Op_bool(OR), ee); :}
+  ;

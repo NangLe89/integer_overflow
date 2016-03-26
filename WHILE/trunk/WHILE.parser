@@ -128,7 +128,9 @@ Expr expression =
      ;
 S stmt =
 	ASSERT expression.be             {: return new AssertS(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be)); :}
-    ;S stmt =
+    ;
+	
+S stmt =
        READ IDENTIFIER             {: return new ReadS(new NumLabel(LabelUtility.nextLabel()), IDENTIFIER); :}
      | SANITIZE IDENTIFIER	   {: return new SanitizeS(new NumLabel(LabelUtility.nextLabel()), IDENTIFIER); :}
      | PRINT expression.e          {: return new PrintS(new NumLabel(LabelUtility.nextLabel()), e); :}
