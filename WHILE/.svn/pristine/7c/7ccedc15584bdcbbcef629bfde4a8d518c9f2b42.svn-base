@@ -1,3 +1,0 @@
-ReadS: S ::= LabelAST:Label <Var>;
-SanitizeS: S ::= LabelAST:Label <Var>;
-PrintS: S ::= LabelAST:Label Expr;

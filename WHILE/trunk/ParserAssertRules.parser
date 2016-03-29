@@ -1,3 +1,0 @@
-S stmt =
-	ASSERT expression.be             {: return new AssertS(new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), be)); :}
-    ;

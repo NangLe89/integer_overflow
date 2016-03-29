@@ -1,5 +1,0 @@
-{
-	if x+3     % type error!
-	then { skip } 
-	else { skip }
-}

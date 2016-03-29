@@ -1,2 +1,0 @@
-to run:
-java -cp tools/beaver-rt.jar:. Compiler <PicoC program>

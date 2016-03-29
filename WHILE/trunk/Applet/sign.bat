@@ -1,1 +1,0 @@
-jarsigner WHILE.jar WHILE
