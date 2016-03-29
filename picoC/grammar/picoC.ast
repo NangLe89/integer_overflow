@@ -7,9 +7,9 @@ abstract Stmt;
 AssignStmt : Stmt ::= LabelAST:Label <Var> Expr;
 IfStmt : Stmt ::= LabeledExpr Then:Stmt [Else:Stmt];
 SkipStmt : Stmt ::= LabelAST:Label <String>;
-EmptyStmt : Stmt;
-CompoundS : Stmt ::= SList:Stmt*;
-ForStmt : Stmt ::= InitStmt:Stmt* LabeledExpr UpdateStmt:Stmt* Stmt;
+EmptyStmt : Stmt ::= LabelAST:Label;
+CompoundStmt : Stmt ::= SList:Stmt*;
+ForStmt : Stmt ::= InitStmt:Expr LabeledExpr UpdateStmt:Expr LastStmt:Stmt;
 WhileStmt : Stmt ::= LabeledExpr Stmt;
 //ReturnStmt : Stmt ::= LabelAST:Label [Result:Expr];
 

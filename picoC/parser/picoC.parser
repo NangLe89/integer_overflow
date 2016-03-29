@@ -22,7 +22,7 @@ Program goal =
   ;
 
 Stmt block =
-    LBRACE block_statements.l RBRACE {: return new CompoundS(l); :}
+    LBRACE block_statements.l RBRACE {: return new CompoundStmt(l); :}
   ;
 
 List block_statements =
@@ -44,7 +44,7 @@ Stmt statement =
   ;
 
 ForStmt for_stmt =
-    FOR LPAREN block_statements.i SEMICOLON expression.e SEMICOLON block_statements.u RPAREN block.s 
+    FOR LPAREN expression.i SEMICOLON expression.e SEMICOLON expression.u RPAREN block.s 
 												{: return new ForStmt(i, new LabeledExpr(new NumLabel(LabelUtility.nextLabel()), e), u, s); :}
   ;
 
@@ -76,21 +76,21 @@ IfStmt if_then_statement =
      ;
 
 Expr simplefact_exp =
-	  primary.p								{: return p; :}			
-	| simplefact_exp.s EQ primary.p					{: return new ABinaryExpr(s, new Op_arth(EQ), p); :}							
+	  primary.p											{: return p; :}			
+	| simplefact_exp.s EQ primary.p						{: return new ABinaryExpr(s, new Op_arth(EQ), p); :}							
 	| simplefact_exp.s MULT primary.p					{: return new ABinaryExpr(s, new Op_arth(MULT), p); :}
 	| simplefact_exp.s DIV primary.p					{: return new ABinaryExpr(s, new Op_arth(DIV), p); :}
 	| simplefact_exp.s MOD primary.p					{: return new ABinaryExpr(s, new Op_arth(MOD), p); :}
 	;
 
 Expr simpleae =
-	   simplefact_exp.se				{: return se; :}							
+	   simplefact_exp.se								{: return se; :}							
 	 | simpleae.a PLUS simplefact_exp.s					{: return new ABinaryExpr(a, new Op_arth(PLUS), s); :} 
 	 | simpleae.a MINUS simplefact_exp.s				{: return new ABinaryExpr(a, new Op_arth(MINUS), s); :}
 	 ;
 
 Expr relexp =
-       simpleae.s					{: return s; :}								
+       simpleae.s										{: return s; :}								
      | simpleae.a EQEQ simpleae.b						{: return new RelExpr(a, new Op_rel(EQEQ), b); :}
 	 | simpleae.a NOTEQ simpleae.b						{: return new RelExpr(a, new Op_rel(NOTEQ), b); :}
 	 | simpleae.a LT simpleae.b							{: return new RelExpr(a, new Op_rel(LT), b); :}
@@ -100,15 +100,15 @@ Expr relexp =
      ;
 
 Expr and_expression =
-    relexp.re				{: return re; :}						
+    relexp.re											{: return re; :}						
   | and_expression.e AND relexp.r						{: return new LogicExpr(e, new Op_bool(AND), r); :}
   ;
 Expr exclusive_or_expression =
-    and_expression.ae		{: return ae; :}							
+    and_expression.ae									{: return ae; :}							
   | exclusive_or_expression.e XOR and_expression.a		{: return new LogicExpr(e, new Op_bool(XOR), a); :}
   ;
 Expr expression =
-    exclusive_or_expression.ee	{: return ee; :}				
+    exclusive_or_expression.ee							{: return ee; :}				
   | expression.ie OR exclusive_or_expression.ee	
 														{: return new LogicExpr(ie, new Op_bool(OR), ee); :}
   ;

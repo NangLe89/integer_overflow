@@ -1,0 +1,35 @@
+// Attributes of the whole program, 
+// following Section 2.1 of Nielsen, Nielsen and Hankin's book 
+// "Program Analysis".
+
+import java.util.*;
+import utility.SetRepUtility;
+import utility.FlowGraph;
+
+aspect ProgramGlobalAttributes {
+
+	// Broadcast progLabels (Lab*) to all children of the statement in the program.
+	eq Program.getStmt().progLabels() = getStmt().labels();
+	inh Set<Label> Block.progLabels();
+	
+	// Broadcast progInitLabel (init(S*)) to all children of the program.
+	eq Program.getStmt().progInitLabel() = getStmt().init();
+	inh Label Block.progInitLabel();
+
+	// Broadcast progFinals (final(S*)) to all children of the program.
+	eq Program.getStmt().progFinals() = getStmt().finals();getS
+	inh Set<Label> Block.progFinals();
+	
+	// Broadcast progFV (FV(S*)) to all children in the program.
+	eq Program.getStmt().progFV() = getStmt().FV();
+	inh Set<String> Block.progFV();
+
+	// Broadcast progAST to all children in the program.
+	eq Program.getStmt().progAST() = this;
+	inh Program Stmt.progAST();
+	inh Program Expr.progAST();
+
+	// Broadcast progCFG to all children in the program.
+	eq Program.getStmt().progCFG() = getStmt().flows();
+	inh FlowGraph<Label,Label> Block.progCFG();
+}

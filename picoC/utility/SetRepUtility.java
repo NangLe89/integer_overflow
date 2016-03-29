@@ -42,6 +42,17 @@ public class SetRepUtility {
 		    return ret;
 		}
 		
+		//P(var* x Int x Int) - val1 and val2 are given value cross with set of keys
+	//	public static Set<Map.Entry> crossWith(Set keys, Object val1, Object val2) {
+	//		Set<Map.Entry> ret = SetRepUtility.emptySet();
+	//		Iterator i = keys.iterator();
+	//		while (i.hasNext()) {
+	//			ret.add(new Pair(i.next(), val1));
+	//			ret.add(new Pair(i.next(), val2));
+	//		}
+	//		return ret;
+	//	}
+
 		/** Form the set of Map.Entry pairs that is the cross product of keys and vals. */
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public static Set<Map.Entry> cross(Set keys, Set vals) {
@@ -52,6 +63,7 @@ public class SetRepUtility {
 			}
 		    return ret;
 		}
+
 
 		public interface Fun<L,T> {
 			T run(L x);

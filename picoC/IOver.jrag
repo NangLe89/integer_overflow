@@ -1,0 +1,112 @@
+import java.util.Set;
+import utility.Pair;
+import utility.SetRepUtility;
+import AST.*;
+
+/** Attributes for non-trivial arithmetic expressions.
+    See Nielsen, Nielsen, and Hankin,
+    Principles of Program Analysis, section 2.1.1.
+    Also defininitions of .equals and .hashCode for expressions.
+    */
+aspect IOver {
+    /** Is this expression a non-trivial arithmetic expression? */
+    syn boolean Expr.nontrivial();
+    eq VarRefExpr.nontrivial() = false;
+    eq NumLitExpr.nontrivial() = false;
+    eq ABinaryExpr.nontrivial() = true;
+    eq BoolLitExpr.nontrivial() = false;
+    eq NotExpr.nontrivial() = false;
+    eq LogicExpr.nontrivial() = false;
+    eq RelExpr.nontrivial() = false;
+    eq LabeledExpr.nontrivial() = getExpr().nontrivial();
+	
+    /** The set of non-trivial arithmetic expressions in a statement. */
+    syn Set<Expr> Program.IOvers();
+    eq Program.IOvers() = getStmt().IOvers();
+    syn Set<Expr> Stmt.IOvers();
+    eq AssignStmt.IOvers() = getExpr().IOvers();
+    eq SkipStmt.IOvers() = SetRepUtility.emptySet();
+	eq EmptyStmt.IOvers() = SetRepUtility.emptySet();
+    eq IfStmt.IOvers() {
+          Set<Expr> ret = getLabeledExpr().IOvers();
+          ret.addAll(getThen().IOvers());
+          ret.addAll(getElse().IOvers());
+          return ret;
+       }
+    eq WhileStmt.IOvers() {
+          Set<Expr> ret = getLabeledExpr().IOvers();
+          ret.addAll(getStmt().IOvers());
+          return ret;
+       }
+	eq ForStmt.IOvers() {
+		 Set<Expr> init = setRepUtility.emptySet();
+		 for (int i=0; i < getNumInitStmt(); i++) {
+			init.addAll(getInitStmt(i).IOvers());
+		}
+		Set<Expr> update = setRepUtility.emptySet();
+		for (int j =0; j < getNumUpdateStmt(); i++) {
+			update.addAll(getUpdateStmt(j).IOvers());
+		} 
+		Set<Expr> ret = getLabeledExpr().IOvers();
+		ret.addAdd(init);
+		ret.addAll(update);
+		ret.addAll(getLastStmt().IOvers());
+		return ret;
+	}
+    eq CompoundStmt.IOvers() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          for (int i =0; i < getNumSList(); i++) {
+             ret.addAll(getSList(i).IOvers());
+          }
+          return ret;
+       }
+       
+    /** The set of non-trivial arithmetic expressions in an expression. */
+    syn Set<Expr> Expr.IOvers();
+    eq VarRefExpr.IOvers() = SetRepUtility.emptySet();
+    eq NumLitExpr.IOvers() = SetRepUtility.emptySet();
+    eq ABinaryExpr.IOvers() {
+          Set<Expr> ret = SetRepUtility.singleton(this);
+          ret.addAll(getLeft().IOvers());
+          ret.addAll(getRight().IOvers());
+          return ret;
+       }
+    eq BoolLitExpr.IOvers() = SetRepUtility.emptySet();
+    eq NotExpr.IOvers() = getExpr().IOvers();
+    eq LogicExpr.IOvers() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          ret.addAll(getLeft().IOvers());
+          ret.addAll(getRight().IOvers());
+          return ret;
+       }
+    eq RelExpr.IOvers() {
+          Set<Expr> ret = SetRepUtility.emptySet();
+          ret.addAll(getLeft().IOvers());
+          ret.addAll(getRight().IOvers());
+          return ret;
+       }
+    eq LabeledExpr.IOvers() = getExpr().IOvers();
+
+    /** The set of non-trivial expressions in the program. */
+    syn Set<Expr> Program.IOverstar();
+    eq Program.IOverstar() = getStmt().IOvers();
+
+    /** The set of non-trivial expressions in the program 
+     *  is broadcast to all blocks. */
+    inh Set<Expr> Stmt.IOverstar();
+    eq Program.getStmt().IOverstar() = getStmt().IOvers();
+
+    inh Set<Expr> Block.IOverstar();
+                                
+    // the following are needed so that Exprs can be hashed...
+    /** Are these Exprs equal? */
+    public boolean Expr.equals(Object oth) {
+       if (oth == null || !(oth instanceof Expr)) { return false; }
+       Expr e = (Expr) oth;
+       return unparse().equals(e.unparse());
+    }
+    /** Return the hash code for this Expr. */
+    public int Expr.hashCode() {
+       return unparse().hashCode();
+    }
+}
