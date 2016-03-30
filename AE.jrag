@@ -6,7 +6,6 @@ import java.util.*;
 
 aspect AE {
 
-/** The kill function for available expressions. */
 
     syn Set<Expr> Block.killAE(Set<Expr> current);
 
@@ -36,7 +35,6 @@ aspect AE {
 
 
 
-/** The gen function for available expressions. */
 
     syn Set<Expr> Block.genAE();
 
@@ -78,8 +76,6 @@ aspect AE {
 
 
 
-/** Compute the entry information for the AE analysis. */
-
     syn Set<Expr> Block.AEentry() circular [AexpStar()];
 
     eq Block.AEentry() {
@@ -118,7 +114,6 @@ aspect AE {
 
 
 
-/** Compute the exit information for the AE analysis. */
 
 syn Set<Expr> Block.AEexit() circular [AexpStar()];
 
