@@ -1,0 +1,125 @@
+\documentclass{article}
+\usepackage{amssymb, amsmath}
+
+\title{CFG for PicoC}
+\author{Joseph Kaile}
+
+\DeclareMathOperator{\init}{init}
+\DeclareMathOperator{\final}{final}
+\DeclareMathOperator{\blocks}{blocks}
+\DeclareMathOperator{\labels}{labels}
+\DeclareMathOperator{\flow}{flow}
+
+\begin{document}
+\maketitle
+
+\begin{equation*}
+\begin{split}
+\init(IfStmt^l) 	&= l \\
+\init(ExprStmt^l) 	&= l \\
+%\init(ContinueStmt^l) 	&= l \\
+%\init(BreakStmt^l) 	&= l \\
+\init(EmptyStmt^l) 	&= l \\
+\init(BlockStmt^l) 	&= \init(Stmt(0)) \\
+\init(VarDeclStmt^l) 	&= l \\
+\init(ForStmt^l) 	&= \init(InitStmt(0)) \\
+\init(WhileStmt^l) 	&= l \\
+\init(DoStmt^l) 	&= \init(Stmt) \\
+%\init(LabeledStmt^l) 	&= l \\
+%\init(GotoStmt^l) 	&= l \\
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+\final(IfStmt^l) 	&= \final(Then) \cup \final(Else) \\
+\final(ExprStmt^l) 	&= \left\{ {l} \right\} \\ 
+%\final(ContinueStmt^l) 	&= \left\{ {BranchTargetLabel} \right\} \\ 
+%\final(BreakStmt^l) 	&= \final(BranchTargetStmt) \\ 
+\final(EmptyStmt^l) 	&= \left\{ {l} \right\} \\ 
+\final(BlockStmt^l) 	&= \final(Stmt(numStmts-1)) \\
+\final(VarDeclStmt^l) 	&= \left\{ {l} \right\} \\ 
+\final(ForStmt^l) 	&= \left\{ {l} \right\} \\ 
+\final(WhileStmt^l) 	&= \left\{ {l} \right\} \\ 
+\final(DoStmt^l) 	&= \left\{ {l} \right\} \\ 
+%\final(LabeledStmt^l) 	&= \final(Stmt) \\ 
+%\final(GotoStmt^l) 	&= \left\{ {Lookup(IDENTIFIER).Label} \right\} \\ 
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+\blocks(IfStmt^l) 	&= \left\{ {IfStmt^l} \right\}
+				 \cup \blocks(Then) \cup \blocks(Else) \\
+\blocks(ExprStmt^l) 	&= \left\{ {ExprStmt^l} \right\} \\ 
+%\blocks(ContinueStmt^l)	&= \left\{ {ContinueStmt} \right\} \\ 
+%\blocks(BreakStmt^l) 	&= \left\{ {BreakStmt} \right\} \\ 
+\blocks(EmptyStmt^l) 	&= \left\{ {EmptyStmt^l} \right\} \\ 
+\blocks(BlockStmt^l) 	&= \left\{ {BlockStmt^l} \right\} \\
+			&\cup \left( \bigcup_{0 \leq i < numStmts} 
+				\blocks(Stmt(i)) \right) \\
+\blocks(VarDeclStmt^l) 	&= \left\{ {VarDeclStmt^l} \right\} \\ 
+\blocks(ForStmt^l) 	&= \left\{ {ForStmt^l} \right\} \cup \blocks(Stmt) \\
+			&\cup \left( \bigcup_{0 \leq i < numInitStmts}
+				\blocks(InitStmt(i)) \right) \\
+			&\cup \left( \bigcup_{0 \leq i < numUpdateStmts}
+				\blocks(UpdateStmt(i)) \right) \\
+\blocks(WhileStmt^l) 	&= \left\{ {WhileStmt^l} \right\} \cup \blocks(Stmt) \\ 
+\blocks(DoStmt^l) 	&= \left\{ {DoStmt^l} \right\} \cup \blocks(Stmt) \\ 
+%\blocks(LabeledStmt^l) 	&= \left\{ {LabeledStmt} \right\} \cup \blocks(Stmt) \\ 
+%\blocks(GotoStmt^l) 	&= \left\{ {GotoStmt} \right\} \\  
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+\labels(Program) &= \bigcup_{Stmt \in \blocks(Program)} 
+			\left\{ {Stmt.Label} \right\} \\
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+\flow(IfStmt^l) 	&= \flow(Then) \cup \flow(Else) \cup
+				\left\{ (l, \init(Then)), (l, \init(Else)) \right\} \\
+\flow(ExprStmt^l) 	&= \emptyset \\
+%\flow(ContinueStmt^l) 	&= \emptyset \\
+%\flow(BreakStmt^l) 	&= \emptyset \\
+\flow(EmptyStmt^l) 	&= \emptyset \\
+\flow(BlockStmt^l) 	&= \bigcup_{0 \leq i < numStmts} \flow(Stmt(i)) \\
+			&\cup \bigcup_{0 \leq i < numStmts-1} \{ (l',l) |
+				l' \in \final(Stmt(i)) \land l = \init(Stmt(i+1)) \} \\
+\flow(VarDeclStmt^l) 	&= \emptyset \\
+\flow(ForStmt^l) 	&= \bigcup_{0 \leq i < numInitStmts-1}
+				\{ (l',l) | l' \in \final(InitStmt(i))
+				\land l = \init(InitStmt(i+1)) \} \\
+			&\cup \{ (l, \init(Stmt)) | l \in \final(InitStmt(numInitStmts-1)) \} \\
+			&\cup \flow(Stmt) \\
+			&\cup \{ (l, \init(UpdateStmt(0))) | l \in \final(Stmt) \} \\
+		 	&\bigcup_{0 \leq i < numUpdateStmts-1}
+				\{ (l',l) | l' \in \final(UpdateStmt(i))
+				\land l = \init(UpdateStmt(i+1)) \} \\
+			&\cup \{ (l', l) | l' \in \final(UpdateStmt(numUpdateStmts-1)) \} \\
+			&\cup \{ (l, \init(Stmt) \} \\
+\flow(WhileStmt^l) 	&= \{ (l, \init(Stmt)) \} \cup \{ (l',l) | l' \in \final(Stmt) \} \cup \flow(Stmt) \\
+\flow(DoStmt^l) 	&= \{ (l, \init(Stmt)) \} \cup \{ (l',l) | l' \in \final(Stmt) \} \cup \flow(Stmt) \\
+%\flow(LabeledStmt^l) 	&= \{ (l, \init(Stmt)) \} \cup \flow(Stmt) \\
+%\flow(GotoStmt^l) 	&= \emptyset 
+\end{split}
+\end{equation*}
+\begin{figure}
+{\tt
+  // ForStmt is 8 \\
+  for(i = 0 /*1*/, j = 0/*2*/; i*j < len; i++ /*3*/, j++/*4*/) \\
+  // Block is 7 \\
+  \{ \\
+    i = i + 2; // 5 \\
+    j = j + 2; // 6 \\
+  \} \\	
+  // The conditional is thought of as label 8. \\
+  // flow(example) = \{(1,2),(2,5),(5,6),(6,3),(3,4),(4,8),(8,5)\} \\
+}
+\caption{For loop example} 
+\end{figure}
+
+\end{document}

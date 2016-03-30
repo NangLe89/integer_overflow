@@ -1,0 +1,141 @@
+/*
+
+import java.util.*;
+
+
+
+aspect AE {
+
+/** The kill function for available expressions. */
+
+    syn Set<Expr> Block.killAE(Set<Expr> current);
+
+    eq AssignStmt.killAE(Set<Expr> current) {
+
+    Set<Expr> ret = new HashSet();
+
+    String assigned_var = getVar();
+
+    for (Expr exp : current)
+
+    {
+
+        if (exp.FV().contains(assigned_var))
+
+        ret.add(exp);
+
+    }
+
+    return ret;
+
+    }
+
+    eq SkipS.killAE(Set<Expr> current) = SetRepUtility.emptySet();
+
+    eq LabeledExpr.killAE(Set<Expr> current) = SetRepUtility.emptySet();
+
+
+
+/** The gen function for available expressions. */
+
+    syn Set<Expr> Block.genAE();
+
+    eq AssignS.genAE() {
+
+    Set<Expr> ret = SetRepUtility.emptySet();
+
+    Expr exp = getExpr();
+
+    if (exp.nontrivial()
+
+    && !(exp.FV().contains(getVar()))) {
+
+        ret.add(exp);
+
+    }
+
+    return ret;
+
+    }
+
+    eq SkipS.genAE() = SetRepUtility.emptySet();
+
+    eq LabeledExpr.genAE() {
+
+    Expr e = getExpr();
+
+    if (e.nontrivial()) {
+
+        return SetRepUtility.singleton(e);
+
+    } else {
+
+        return SetRepUtility.emptySet();
+
+    }
+
+    }
+
+
+
+/** Compute the entry information for the AE analysis. */
+
+    syn Set<Expr> Block.AEentry() circular [AexpStar()];
+
+    eq Block.AEentry() {
+
+        Set<Expr> ret;
+
+        if (getLabelAST().equals(progInitLabel())) {
+
+            ret = SetRepUtility.emptySet();
+
+        } else {
+
+            Set<Set<Expr>> inputs = SetRepUtility.map(
+
+            new SetRepUtility.Fun<Label, Set<Expr>>() {
+
+                public Set<Expr> run(Label l) {
+
+                    Block b = l.itsBlock();
+
+                    return b.AEexit();
+
+                }
+
+        },
+
+        inFlows());
+
+        ret = SetRepUtility.intersect(inputs);
+
+        }
+
+        return ret;
+
+}
+
+
+
+/** Compute the exit information for the AE analysis. */
+
+syn Set<Expr> Block.AEexit() circular [AexpStar()];
+
+eq Block.AEexit() {
+
+Set<Expr> ret = SetRepUtility.emptySet(); // start with a fresh set!
+
+ret.addAll(this.AEentry());
+
+ret.removeAll(this.killAE(ret));
+
+ret.addAll(this.genAE());
+
+return ret;
+
+}
+
+
+
+*/

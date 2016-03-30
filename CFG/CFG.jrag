@@ -1,0 +1,154 @@
+import java.util.*;
+
+aspect CFG{
+  syn Integer Stmt.Label() = new Integer(getl());
+
+  syn Integer Stmt.init() = Label();
+  eq Block.init() = getStmt(0).init();
+  eq ForStmt.init() = getInitStmt(0).init();
+  eq DoStmt.init() = getStmt().init();
+
+  syn Set<Integer> Stmt.finals(){
+    Set<Integer> ret = new HashSet<Integer>();
+    ret.add(Label());
+    return ret;
+  }
+  eq IfStmt.finals(){
+    Set<Integer> ret = new HashSet<Integer>();
+    ret.addAll(getThen().finals());
+    ret.addAll(getElse().finals());
+    return ret;
+  }
+  eq Block.finals() = getStmt(getNumStmt()-1).finals(); 
+
+  syn Set<Stmt> Stmt.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    return ret;
+  }
+  eq IfStmt.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    ret.addAll(getThen().blocks());
+    ret.addAll(getElse().blocks());
+    return ret;
+  }
+  eq Block.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    for(Stmt s : getStmts())
+      ret.addAll(s.blocks());
+    return ret;
+  }
+  eq ForStmt.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    ret.addAll(getStmt().blocks());
+    for(Stmt s : getInitStmts())
+      ret.addAll(s.blocks());
+    for(Stmt s : getUpdateStmts())
+      ret.addAll(s.blocks());
+    return ret; 
+  }
+  eq WhileStmt.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    ret.addAll(getStmt().blocks());
+    return ret;
+  }
+  eq DoStmt.blocks(){
+    Set<Stmt> ret = new HashSet<Stmt>();
+    ret.add(this);
+    ret.addAll(getStmt().blocks());
+    return ret;
+  }
+
+  syn Set<Integer> Program.labels(){
+    Set<Integer> ret = new HashSet<Integer>();
+    for(Stmt s : getStmt().blocks())
+      ret.add(s.Label());
+    return ret;
+  }  
+
+  syn Set<Pair> Stmt.flow() = new HashSet<Pair>();
+  eq IfStmt.flow(){
+    Set<Pair> ret = new HashSet<Pair>();
+    ret.addAll(getThen().flow());
+    ret.addAll(getElse().flow());
+    ret.add(new Pair(Label(), getThen().init()));
+    ret.add(new Pair(Label(), getElse().init()));
+    return ret;
+  } 
+  eq Block.flow(){
+    Set<Pair> ret = new HashSet<Pair>();
+    for(Stmt s : getStmts())
+      ret.addAll(s.flow());
+    for(int i = 0; i < getNumStmt()-1; i++)
+      for(Integer l : getStmt(i).finals())
+        ret.add(new Pair(l, getStmt(i+1).init())); 
+    return ret; 
+  }
+  eq ForStmt.flow(){
+    Set<Pair> ret = new HashSet<Pair>();
+    for(int i = 0; i < getNumInitStmt()-1; i++)
+      for(Integer l : getInitStmt(i).finals())
+        ret.add(new Pair(l, getInitStmt(i+1).init()));
+    for(Integer l : getInitStmt(getNumInitStmt()-1).finals())
+	ret.add(new Pair(l, getStmt().init()));
+    ret.addAll(getStmt().flow());
+    for(Integer l : getStmt().finals())
+      ret.add(new Pair(l, getUpdateStmt(0).init()));
+    for(int i = 0; i < getNumUpdateStmt()-1; i++)
+      for(Integer l : getUpdateStmt(i).finals())
+        ret.add(new Pair(l, getUpdateStmt(i+1).init()));
+    for(Integer l : getUpdateStmt(getNumUpdateStmt()-1).finals())
+      ret.add(new Pair(l, Label()));
+    ret.add(new Pair(Label(), getStmt().init()));
+    return ret;
+  }
+  eq WhileStmt.flow(){
+    Set<Pair> ret = new HashSet<Pair>();
+    ret.add(new Pair(Label(), getStmt().init()));
+    for(Integer l : getStmt().finals())
+      ret.add(new Pair(l, Label()));
+    ret.addAll(getStmt().flow());
+    return ret;
+  }
+  eq DoStmt.flow(){
+    Set<Pair> ret = new HashSet<Pair>();
+    ret.add(new Pair(Label(), getStmt().init()));
+    for(Integer l : getStmt().finals())
+      ret.add(new Pair(l, Label()));
+    ret.addAll(getStmt().flow());
+    return ret;
+  } 
+
+public boolean Stmt.equals(Object oth){
+    if(oth == null || !(oth instanceof Stmt)) { return false; }
+    Stmt b = (Stmt) oth;
+    return Label().equals(b.Label());
+}
+  public void Program.PrintCFG(){
+     System.out.print("Labels = ");
+     for(Integer l : labels())
+       System.out.print(l + " ");
+     System.out.println();
+     System.out.print("Flows = ");
+     for(Pair p : getStmt().flow())
+        System.out.print("("+ p.first() + "," + p.second() + ") ");
+     System.out.println();
+  }
+}
+
+public class Pair{
+  private Integer first;
+  private Integer second;
+  public Pair(Integer first, Integer second){
+    this.first = first;
+    this.second = second;
+  }
+  public Integer first(){ return first; }
+  public Integer second(){ return second; }
+}
+
+

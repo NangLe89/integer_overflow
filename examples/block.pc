@@ -1,0 +1,35 @@
+{
+
+  a = f;//  1
+
+  if(b == c)// 4 
+   a = a*b; // 2
+  else
+   c =  c+f*(a+b);//  3
+
+  while(c == true)// 6
+    a++;// 5
+
+}
+/*
+init(getStmt(0)) = 1
+init(getStmt(1)) = 4
+init(getStmt(2)) = 6
+
+final(getStmt(0)) = {1}
+final(getStmt(1)) = {2, 3}
+final(getStmt(2)) = {6}
+
+getStmt(0) = (assignment statement)
+getStmt(1) = (if statement)
+getStmt(2) = (while statement)
+
+flow(getStmt(0)) = emptyset
+flow(getStmt(1)) = {(4,2), (4,3)}
+flow(getStmt(2)) = {(6, 5), (5, 6)}
+
+{(1, 4), (2, 6), (3, 6)}
+
+{(1, 4), (2, 6), (3, 6), (4,2), (4,3), (6,5), (5,6)
+
+*/

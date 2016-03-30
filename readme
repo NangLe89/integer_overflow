@@ -1,0 +1,9 @@
+to run:
+execute ./test.sh
+
+Due credit:
+The grammar, parser and scanner were taken from ExtendJ.
+Joseph deleted non-C abilities, such as exceptions and classes,
+and some C abilities, such as function declarations.
+
+

@@ -1,0 +1,5 @@
+while(i < len1){
+  i = i+2;
+  j = j+2;
+  k = a*b;
+}
