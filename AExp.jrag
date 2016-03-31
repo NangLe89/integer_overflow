@@ -97,13 +97,13 @@ aspect AExp {
     inh Set<Expr> Stmt.AexpStar();
     eq Program.getStmt().AexpStar() = getStmt().Aexps();
 
-    inh Set<Expr> Block.AexpStar();
+   // inh Set<Expr> Block.AexpStar();
                                 
-/*public boolean Expr.equals(Object oth) {
+public boolean Expr.equals(Object oth) {
        if (oth == null || !(oth instanceof Expr)) { return false; }
        Expr e = (Expr) oth;
        return unparse().equals(e.unparse());
-    }*/
+    }
 
 }
 
