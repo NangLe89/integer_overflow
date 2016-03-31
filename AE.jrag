@@ -5,9 +5,9 @@ import java.util.*;
 
 aspect AE {   
 	syn Set<Expr> Stmt.killAE(Set<Expr> current) = new HashSet();
-    eq AssignExpr.killAE(Set<Expr> current) {
+    eq ExprStmt.killAE(Set<Expr> current) {
 		Set<Expr> ret = new HashSet();
-		String assigned_var = getDest();
+		String assigned_var = getExpr();
 		for (Expr exp : current)
 		{
 			if (exp.FV().contains(assigned_var))
