@@ -4,7 +4,7 @@ public class ExpressionTest {
   public static void main(String[] args){
     Program p = new getAST().parse("examples/expressiontest.pc");
     Block b = (Block)p.getStmt();  // program is a block statement.
-    ExprStmt es = (ExprStmt)b.getStmt(0); // get first statement of block.  
+    ExprStmt es = (ExprStmt)b.getSList(0); // get first statement of block.  
     AssignExpr e = (AssignExpr)es.getExpr(); // e has (x*5+30/3-100%2)
     Access a = (Access)e.getDest();  //get variable a.
     String var_name = a.getID(); // get name

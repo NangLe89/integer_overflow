@@ -4,8 +4,8 @@ aspect CFG{
   syn Integer Stmt.Label() = new Integer(getl());
 
   syn Integer Stmt.init() = Label();
-  eq BreakStmt.init() = new HashSet();
-  eq Block.init() = getStmt(0).init();
+ // eq BreakStmt.init() = new HashSet();
+  eq Block.init() = getSList(0).init();
   eq ForStmt.init() = getInitStmt(0).init();
   eq DoStmt.init() = getStmt().init();
 
@@ -21,7 +21,7 @@ aspect CFG{
     ret.addAll(getElse().finals());
     return ret;
   }
-  eq Block.finals() = getStmt(getNumStmt()-1).finals(); 
+  eq Block.finals() = getSList(getNumSList()-1).finals(); 
 
   syn Set<Stmt> Stmt.blocks(){
     Set<Stmt> ret = new HashSet<Stmt>();
@@ -38,7 +38,7 @@ aspect CFG{
   eq Block.blocks(){
     Set<Stmt> ret = new HashSet<Stmt>();
     ret.add(this);
-    for(Stmt s : getStmts())
+    for(Stmt s : getSLists())
       ret.addAll(s.blocks());
     return ret;
   }
@@ -83,11 +83,11 @@ aspect CFG{
   } 
   eq Block.flow(){
     Set<Pair> ret = new HashSet<Pair>();
-    for(Stmt s : getStmts())
+    for(Stmt s : getSLists())
       ret.addAll(s.flow());
-    for(int i = 0; i < getNumStmt()-1; i++)
-      for(Integer l : getStmt(i).finals())
-        ret.add(new Pair(l, getStmt(i+1).init())); 
+    for(int i = 0; i < getNumSList()-1; i++)
+      for(Integer l : getSList(i).finals())
+        ret.add(new Pair(l, getSList(i+1).init())); 
     return ret; 
   }
   eq ForStmt.flow(){

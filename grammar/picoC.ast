@@ -9,7 +9,7 @@ ExprStmt : Stmt ::= Expr;
 ContinueStmt : Stmt ::= <Identifier:String>;
 BreakStmt : Stmt ::= <Identifier:String>;
 EmptyStmt : Stmt;
-Block : Stmt ::= Stmt*;
+Block : Stmt ::= SList:Stmt*;
 VarDeclStmt : Stmt ::= TypeAccess:Access <ID:String>;
 GotoStmt : Stmt ::= <Identifier:String>;
 

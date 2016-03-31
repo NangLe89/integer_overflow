@@ -28,17 +28,14 @@ import AST.*;
 %goal goal;
 
 Program goal =
-  statement			{: return new Program(statement); :}
+  block			{: return new Program(block); :}
   ;
-Block block =
+Stmt block =
     LBRACE block_statements.list? RBRACE {: return new Block(l++, list); :}
   ;
 List block_statements =
-    block_statement.b                     {: return new List().add(b); :}
-  | block_statements.l block_statement.b  {: return l.add(b); :}
-  ;
-Stmt block_statement =
-    statement
+    statement.b                    {: return new List().add(b); :}
+  | block_statements.l SEMICOLON statement.b  {: return l.add(b); :}
   ;
 
 //Variable declaration
@@ -107,11 +104,11 @@ GotoStmt goto_statement =
 
 ContinueStmt continue_statement =
     CONTINUE IDENTIFIER.id SEMICOLON  {: return new ContinueStmt(l++, id); :}
-  | CONTINUE               SEMICOLON  {: return new ContinueStmt(l++, ""); :}
+//  | CONTINUE               SEMICOLON  {: return new ContinueStmt(l++, ""); :}
   ;
 BreakStmt break_statement =
-    BREAK IDENTIFIER.id SEMICOLON     {: return new BreakStmt(l++, id); :}
-  | BREAK               SEMICOLON     {: return new BreakStmt(l++, ""); :}
+   BREAK IDENTIFIER.id SEMICOLON     {: return new BreakStmt(l++, id); :}
+ // |BREAK               SEMICOLON     {: return new BreakStmt(l++, ""); :}
   ;
 DoStmt do_statement =
     DO statement.s WHILE LPAREN expression.e RPAREN SEMICOLON {: return new DoStmt(l++, s, e); :}
