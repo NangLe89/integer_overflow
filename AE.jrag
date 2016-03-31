@@ -4,7 +4,7 @@ import java.util.*;
 
 
 aspect AE {   
-	syn Set<Expr> Block.killAE(Set<Expr> current);
+	syn Set<Expr> Stmt.killAE(Set<Expr> current);
     eq AssignExpr.killAE(Set<Expr> current) {
     Set<Expr> ret = new HashSet();
     String assigned_var = getDest();
@@ -19,7 +19,7 @@ aspect AE {
     eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
     eq Binary.killAE(Set<Expr> current) = new HashSet();
 
-    syn Set<Expr> Block.genAE();
+    syn Set<Expr> Stmt.genAE();
     eq AssignExpr.genAE() {
 		Set<Expr> ret = new HashSet();
 		Expr exp = getExpr();
