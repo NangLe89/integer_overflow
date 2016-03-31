@@ -17,7 +17,7 @@ GotoStmt : Stmt ::= <Identifier:String>;
 abstract BranchTargetStmt : Stmt; 
 ForStmt : BranchTargetStmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* Stmt;
 WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
-LabeledStmt : BranchTargetStmt ::= <Identifier:String> Stmt;
+LabeledStmt : BranchTargetStmt ::= <Identifier> Stmt;
 DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
 
 abstract Expr;

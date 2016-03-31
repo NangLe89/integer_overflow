@@ -4,10 +4,11 @@ import java.util.*;
 
 
 aspect AE {   
-	syn Set<Expr> Stmt.killAE(Set<Expr> current) = new HashSet();
-    eq ExprStmt.killAE(Set<Expr> current) {
+	syn Set<Expr> Expr.killAE(Set<Expr> current) = new HashSet();
+    eq AssignExpr.killAE(Set<Expr> current) {
 		Set<Expr> ret = new HashSet();
-		String assigned_var = getExpr();
+		Set<String> h = new HashSet(current);
+		String assigned_var = FV().getDest();
 		for (Expr exp : current)
 		{
 			if (exp.FV().contains(assigned_var))
@@ -15,9 +16,9 @@ aspect AE {
 		}
 		return ret;
     }
-	eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
-	eq ContinueStmt.killAE(Set<Expr> current) = new HashSet();
-	eq EmptyStmt.killAE(Set<Expr> current) = new HashSet();
+//	eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
+//	eq ContinueStmt.killAE(Set<Expr> current) = new HashSet();
+//	eq EmptyStmt.killAE(Set<Expr> current) = new HashSet();
 //	eq VarDeclStmt.killAE(Set<Expr> current) {
 //		Set<Expr> ret = new HashSet();
 //		String assigned_var = getID();
