@@ -1,176 +1,109 @@
 import java.util.*;
-
 import AST.*;
-
-
-
-
 
 aspect AExp {
 
 	syn Set<Expr> Program.Aexps();
-
 	eq Program.Aexps() = getStmt().Aexps();
-
+	
 	syn Set<Expr> Stmt.Aexps();
-
 	eq Stmt.Aexps() = new HashSet();
-
     eq ExprStmt.Aexps() = getExpr().Aexps();
-
-//eq VarDeclStmt.Aexps() = getTypeAccess().Aexps();
-
 	eq BreakStmt.Aexps() = new HashSet();
-
     eq GotoStmt.Aexps() = new HashSet();
-
     eq EmptyStmt.Aexps() = new HashSet();
-
     eq Block.Aexps() {
-
         Set<Expr> ret = new HashSet();
-
         for (int i=0; i < getNumStmt() ; i++){
-
             ret.addAll(getStmt(i).Aexps());
-
         }
-
         return ret;
-
     }
 
 	eq IfStmt.Aexps() {
-
         Set<Expr> ret = getCondition().Aexps();
-
         ret.addAll(getThen().Aexps());
-
         ret.addAll(getElse().Aexps());
-
         return ret;
 
 		}
 
-//    syn Set<Expr> BranchTargetStmt.Aexps() = getStmt().Aexps();
-
     eq WhileStmt.Aexps() {
-
         Set<Expr> ret = getCondition().Aexps();
-
         ret.addAll(getStmt().Aexps());
-
         return ret;
 
     }
-
-
+	eq ForStmt.Aexps() {
+		Set<Expr> ret = new HashSet();
+		for (int i =0; i < getNumInitStmt(); i++) {
+			ret.addAll(getInitStmt(i).Aexps());
+		}
+		ret.addAll(getCondition().Aexps());
+		for (int i =0; i <getNumUpdateStmt(); i++) {
+			ret.addAll(getUpdateStmt(i).Aexps());
+		}
+		return ret;
+	}
+	eq LabeledStmt.Aexps() {
+		Set<Expr> ret = new HashSet();
+		ret.addAll(getStmt().Aexps());
+		return ret;
+	}
+	eq DoStmt.Aexps() {
+		Set<Expr> ret = getCondition().Aexps();
+		ret.addAll(getStmt().Aexps());
+		return ret;
+	}
 
     syn Set<Expr> Expr.Aexps();
 
     syn Set<Expr> AssignExpr.Aexps();
-
     eq AssignExpr.Aexps() {
-
         Set<Expr> ret = new HashSet();
-
         ret.addAll(getDest().Aexps());
-
         ret.addAll(getSource().Aexps());
-
         return ret;
-
     }
 
-  //  syn Set<Expr> AssignSimpleExpr.getExpr() = getAssignExpr().Aexps();
-
- //   syn Set<Expr> AssignAdditiveExpr.getExpr()= getAssignExpr().Aexps();
-
-   // syn Set<Expr> AssignMultiplicativeExpr.getExpr()= getAssignExpr().Aexps();
-
-  //  syn Set<Expr> AssignShiftExpr.getExpr()= getAssignExpr().Aexps();
-
-   // syn Set<Expr> AssignBitwiseExpr.getExpr()= getAssignExpr().Aexps();
-
-        //eq AssignPlusExpr.getExpr() = getAssignAdditiveExpr().getExpr();
-
-        //eq AssignMinusExpr.getExpr() = getAssignAdditiveExpr().getExpr();
-
-syn Set<Expr> Binary.Aexps();
-
-            eq Binary.Aexps(){
-
-        Set<Expr> ret = new HashSet();
-
-        ret.addAll(getLeftOperand().Aexps());
-
-        ret.addAll(getRightOperand().Aexps());
-
-        return ret;
-
+	syn Set<Expr> Binary.Aexps();
+        eq Binary.Aexps(){
+			Set<Expr> ret = new HashSet();
+	        ret.addAll(getLeftOperand().Aexps());
+	        ret.addAll(getRightOperand().Aexps());
+	        return ret;
     }
+	eq ArithmeticExpr.Aexps() = getBinary.Aexps();
+	syn Set<Expr> Unary.Aexps() = getOperand().Aexps();
 
-  //  syn Set<Expr> ArithmeticExpr.getExpr() = getBinary().Aexps();
+	syn Set<Expr> PrimaryExpr.Aexps();
+	eq Literal.Aexps()  = new HashSet();
 
-  //  syn Set<Expr> ShiftExpr.getExpr() = getBinary().Aexps();
+	syn Set<Expr> Access.Aexps() = new HashSet();
+		eq VarDeclStmt.Aexps() = getTypeAccess().Aexps();
 
-   // syn Set<Expr> RelationalExpr.getExpr() = getBinary().Aexps();
-
-  //  syn Set<Expr> BitwiseExpr.getExpr() = getBinary().Aexps();
-
-//    syn Set<Expr> LogicalExpr.getExpr() = getBinary().Aexps();
-
-
-
-syn Set<Expr> Unary.Aexps() = getOperand().Aexps();
-
-syn Set<Expr> PrimaryExpr.Aexps();
-
-syn Set<Expr> Literal.Aexps()  = new HashSet();
-
-syn Set<Expr> Access.Aexps() = new HashSet();
-
-syn Set<Expr> ConditionalExpr.Aexps();
-
-eq ConditionalExpr.Aexps() {
-
-Set<Expr> ret = getCondition().Aexps();
-
-ret.addAll(getTrueExpr().Aexps());
-
-ret.addAll(getFalseExpr().Aexps());
-
-return ret;
-
-}
-
-  /** Intersect all sets in a set of sets. */
-
-	/*	public static <T> Set<T> intersect(Set<Set<T>> sets) {
-
-			Set<T> ret = new HashSet<T>();
-
-			boolean started = false;
-
-			for (Set<T> s : sets) {
-
-				if (!started) {
-
-					ret.addAll(s);
-
-					started = true;
-
-				} else {
-
-					ret.retainAll(s);
-
-				}
-
-			}
-
+	syn Set<Expr> ConditionalExpr.Aexps();
+		eq ConditionalExpr.Aexps() {
+			Set<Expr> ret = getCondition().Aexps();
+			ret.addAll(getTrueExpr().Aexps());
+			ret.addAll(getFalseExpr().Aexps());
 			return ret;
+		}
 
-		} */
+		/** The set of non-trivial expressions in the program. */
+    syn Set<Expr> Program.AexpStar();
+    eq Program.AexpStar() = getStmt().Aexps();
+
+    inh Set<Expr> Stmt.AexpStar();
+    eq Program.getStmt().AexpStar() = getStmt().Aexps();
+
+    inh Set<Expr> Block.AexpStar();
+                                
+public boolean Expr.equals(Object oth) {
+       if (oth == null || !(oth instanceof Expr)) { return false; }
+       Expr e = (Expr) oth;
+       return unparse().equals(e.unparse());
+    }
 
 }
 

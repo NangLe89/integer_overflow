@@ -19,11 +19,6 @@ ForStmt : BranchTargetStmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* 
 WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
 LabeledStmt : BranchTargetStmt ::= <Identifier:String> Stmt;
 DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
-//SwitchStmt : BranchTargetStmt ::= Expr Block;
-
-//abstract Case : Stmt;
-//ConstCase : Case ::= Value:Expr;
-//DefaultCase : Case;
 
 abstract Expr;
 

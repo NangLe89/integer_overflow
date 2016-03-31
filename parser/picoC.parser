@@ -65,11 +65,9 @@ Stmt statement =
   | expression_statement
   | block
   | empty_statement
-//  | switch_statement
   | do_statement
   | break_statement
   | continue_statement
-//  | return_statement
   | local_variable_declaration_statement
   | goto_statement
   ;
@@ -106,9 +104,7 @@ LabeledStmt labeled_statement =
 GotoStmt goto_statement =
   GOTO IDENTIFIER.id SEMICOLON		{: return new GotoStmt(l++, id); :}
   ;
-//ReturnStmt return_statement =
-//    RETURN expression? SEMICOLON      {: return new ReturnStmt(l++, expression); :}
-//  ;
+
 ContinueStmt continue_statement =
     CONTINUE IDENTIFIER.id SEMICOLON  {: return new ContinueStmt(l++, id); :}
   | CONTINUE               SEMICOLON  {: return new ContinueStmt(l++, ""); :}
@@ -120,22 +116,7 @@ BreakStmt break_statement =
 DoStmt do_statement =
     DO statement.s WHILE LPAREN expression.e RPAREN SEMICOLON {: return new DoStmt(l++, s, e); :}
   ;
-//SwitchStmt switch_statement =
-//    SWITCH LPAREN expression.e RPAREN switch_block.list {: return new SwitchStmt(l, e, list); :}
-//  ;
-//Block switch_block =
-//    LBRACE switch_statements.list RBRACE          {: return new Block(l++, list); :}
-//  | LBRACE RBRACE                              {: return new Block(l++, new List()); :}
-//  ;
-//List switch_statements =
-//    switch_label.s                             {: return new List().add(s); :}
-//  | switch_statements.l switch_label.s         {: return l.add(s); :}
-//  | switch_statements.l block_statement.b      {: return l.add(b); :}
-//  ;
-//Case switch_label =
-//    CASE expression.e COLON           {: return new ConstCase(l++, e); :}
-//  | DEFAULT COLON                              {: return new DefaultCase(l++); :}
-//  ;
+
 ExprStmt expression_statement =
     statement_expression.e SEMICOLON           {: return e; :}
   ;

@@ -4,6 +4,7 @@ aspect CFG{
   syn Integer Stmt.Label() = new Integer(getl());
 
   syn Integer Stmt.init() = Label();
+  eq BreakStmt.init() = new HashSet();
   eq Block.init() = getStmt(0).init();
   eq ForStmt.init() = getInitStmt(0).init();
   eq DoStmt.init() = getStmt().init();
@@ -13,6 +14,7 @@ aspect CFG{
     ret.add(Label());
     return ret;
   }
+  eq BreakStmt.finals() = new HashSet();
   eq IfStmt.finals(){
     Set<Integer> ret = new HashSet<Integer>();
     ret.addAll(getThen().finals());

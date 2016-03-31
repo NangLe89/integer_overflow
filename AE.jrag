@@ -1,136 +1,94 @@
-/*
-
+import AST.*;
 import java.util.*;
 
 
-
-aspect AE {
-
-
-    syn Set<Expr> Block.killAE(Set<Expr> current);
-
-    eq AssignStmt.killAE(Set<Expr> current) {
-
+aspect AE {   
+	syn Set<Expr> Block.killAE(Set<Expr> current);
+    eq AssignExpr.killAE(Set<Expr> current) {
     Set<Expr> ret = new HashSet();
-
-    String assigned_var = getVar();
-
+    String assigned_var = getDest();
     for (Expr exp : current)
-
     {
-
         if (exp.FV().contains(assigned_var))
-
         ret.add(exp);
-
     }
-
     return ret;
-
     }
 
-    eq SkipS.killAE(Set<Expr> current) = SetRepUtility.emptySet();
-
-    eq LabeledExpr.killAE(Set<Expr> current) = SetRepUtility.emptySet();
-
-
-
+    eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
+    eq Binary.killAE(Set<Expr> current) = new HashSet();
 
     syn Set<Expr> Block.genAE();
-
-    eq AssignS.genAE() {
-
-    Set<Expr> ret = SetRepUtility.emptySet();
-
-    Expr exp = getExpr();
-
-    if (exp.nontrivial()
-
-    && !(exp.FV().contains(getVar()))) {
-
-        ret.add(exp);
-
+    eq AssignExpr.genAE() {
+		Set<Expr> ret = new HashSet();
+		Expr exp = getExpr();
+		if (exp.nontrivial()
+		&& !(exp.FV().contains(getDest()))) {
+			ret.add(exp);
+		}
+		return ret;
     }
 
-    return ret;
-
+    eq BreakStmt.genAE() = new HashSet();
+    eq Binary.genAE() {
+		Expr e = getExpr();
+		if (e.nontrivial()) {
+			HashSet h = new HashSet();
+			h.add(e);
+			return h;
+		} else {
+			HashSet a = new HashSet();
+			return a;
+		}
     }
-
-    eq SkipS.genAE() = SetRepUtility.emptySet();
-
-    eq LabeledExpr.genAE() {
-
-    Expr e = getExpr();
-
-    if (e.nontrivial()) {
-
-        return SetRepUtility.singleton(e);
-
-    } else {
-
-        return SetRepUtility.emptySet();
-
-    }
-
-    }
-
-
 
     syn Set<Expr> Block.AEentry() circular [AexpStar()];
-
     eq Block.AEentry() {
-
         Set<Expr> ret;
-
-        if (getLabelAST().equals(progInitLabel())) {
-
-            ret = SetRepUtility.emptySet();
-
+        if (getLabel().equals(Stmt.init())) {
+            ret = new HashSet();
         } else {
-
-            Set<Set<Expr>> inputs = SetRepUtility.map(
-
-            new SetRepUtility.Fun<Label, Set<Expr>>() {
-
+            Set<Set<Expr>> inputs = RunAE.map(
+            new RunAE.Fun<Label, Set<Expr>>() {
                 public Set<Expr> run(Label l) {
-
                     Block b = l.itsBlock();
-
                     return b.AEexit();
-
                 }
-
         },
-
         inFlows());
-
-        ret = SetRepUtility.intersect(inputs);
-
+        ret = new RunAE.intersect(inputs);
         }
-
         return ret;
+	}
 
+	syn Set<Expr> Block.AEexit() circular [AexpStar()];
+		eq Block.AEexit() {
+			Set<Expr> ret = new HashSet(); // start with a fresh set!
+			ret.addAll(this.AEentry());
+			ret.removeAll(this.killAE(ret));
+			ret.addAll(this.genAE());
+			return ret;
+	}
 }
-
-
-
-
-syn Set<Expr> Block.AEexit() circular [AexpStar()];
-
-eq Block.AEexit() {
-
-Set<Expr> ret = SetRepUtility.emptySet(); // start with a fresh set!
-
-ret.addAll(this.AEentry());
-
-ret.removeAll(this.killAE(ret));
-
-ret.addAll(this.genAE());
-
-return ret;
-
+public class RunAE{
+	public static <T,List> Set<T> map(Fun<List,T> f, Set<List> args) {
+			Set<T> ret = new HashSet<T>();
+			for (List e : args) {
+				ret.add(f.run(e));
+			}
+			return ret;
+	}
+	public static <T> Set<T> intersect(Set<Set<T>> sets) {
+			Set<T> ret = new HashSet<T>();
+			boolean started = false;
+			for (Set<T> s : sets) {
+				if (!started) {
+					ret.addAll(s);
+					started = true;
+				} else {
+					ret.retainAll(s);
+				}
+			}
+			return ret;
+	}
 }
-
-
-
-*/
