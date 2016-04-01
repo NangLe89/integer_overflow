@@ -99,11 +99,11 @@ aspect AExp {
 
    // inh Set<Expr> Block.AexpStar();
                                 
-public boolean Expr.equals(Object oth) {
-       if (oth == null || !(oth instanceof Expr)) { return false; }
-       Expr e = (Expr) oth;
-       return unparse().equals(e.unparse());
-    }
+public boolean Stmt.equals(Object oth){
+    if(oth == null || !(oth instanceof Stmt)) { return false; }
+    Stmt b = (Stmt) oth;
+    return Label().equals(b.Label());
+	}
 
 }
 

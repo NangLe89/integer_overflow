@@ -42,7 +42,7 @@ aspect AE {
 	syn Set<Expr> Stmt.AEentry() circular [AexpStar()];
 	eq Stmt.AEentry() {
 		Set<Expr> ret;
-		if (getl().equals(getStmt().init())) {
+		if (getl().equals(progInitLabel())) {
 			ret = new HashSet();
 		} else {
 			Set<Set<Expr>> inputs = map(
@@ -52,16 +52,15 @@ aspect AE {
 					return b.AEexit();
 				}
 			},
-			getStmt().Flows());
+			getStmt().flows());
 			ret = new intersect(inputs);
 			}
 			return ret;
 		}
 }
 
-
-	//syn Set<Expr> Block.AEexit() circular [AexpStar()];
-//		eq Block.AEexit() {
+	//syn Set<Expr> Stmt.AEexit() circular [AexpStar()];
+//		eq Stmt.AEexit() {
 //			Set<Expr> ret = new HashSet(); // start with a fresh set!
 //			ret.addAll(this.AEentry());
 //			ret.removeAll(this.killAE(ret));
@@ -69,28 +68,31 @@ aspect AE {
 //			return ret;
 //	}
 //}
-public class RunAE{
-	public interface Fun<L,T> {
-			T run(L x);
-		}
-	public static <T,L> Set<T> map(Fun<L,T> f, Set<L> args) {
-			Set<T> ret = new HashSet<T>();
-			for (L e : args) {
-				ret.add(f.run(e));
-			}
-			return ret;
-	}
-	public static <T> Set<T> intersect(Set<Set<T>> sets) {
-			Set<T> ret = new HashSet<T>();
-			boolean started = false;
-			for (Set<T> s : sets) {
-				if (!started) {
-					ret.addAll(s);
-					started = true;
-				} else {
-					ret.retainAll(s);
-				}
-			}
-			return ret;
-	}
-}
+//public class map{
+	//public static <T,L> Set<T> map(Fun<L,T> f, Set<L> args) {
+		//	Set<T> ret = new HashSet<T>();
+	//		for (L e : args) {
+	//			ret.add(f.run(e));
+	//		}
+	//		return ret;
+//	}
+//}
+//public class intersect {
+//	public static <T> Set<T> intersect(Set<Set<T>> sets) {
+	//		Set<T> ret = new HashSet<T>();
+		//	boolean started = false;
+	//		for (Set<T> s : sets) {
+	//			if (!started) {
+	//				ret.addAll(s);
+	//				started = true;
+	//			} else {
+	//				ret.retainAll(s);
+	//			}
+	//		}
+	//		return ret;
+//	}
+//}
+//public class Fun{
+//	public interface Fun<L,T> {
+//			T run(L x);
+//		}

@@ -125,11 +125,11 @@ aspect CFG{
     return ret;
   } 
 
-public boolean Stmt.equals(Object oth){
+  public boolean Stmt.equals(Object oth){
     if(oth == null || !(oth instanceof Stmt)) { return false; }
     Stmt b = (Stmt) oth;
     return Label().equals(b.Label());
-}
+	}
   public void Program.PrintCFG(){
      System.out.print("Labels = ");
      for(Integer l : labels())
