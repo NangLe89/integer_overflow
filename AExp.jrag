@@ -3,17 +3,17 @@ import AST.*;
 
 aspect AExp {
 
-	syn Set<Expr> Program.Aexps();
+	syn LinkedList<Expr> Program.Aexps();
 	eq Program.Aexps() = getStmt().Aexps();
 	
-	syn Set<Expr> Stmt.Aexps();
+	syn LinkedList<Expr> Stmt.Aexps();
     eq ExprStmt.Aexps() = getExpr().Aexps();
-	eq BreakStmt.Aexps() = new HashSet();
-    eq GotoStmt.Aexps() = new HashSet();
-    eq EmptyStmt.Aexps() = new HashSet();
-	eq ContinueStmt.Aexps() = new HashSet();
+	eq BreakStmt.Aexps() = new LinkedList();
+    eq GotoStmt.Aexps() = new LinkedList();
+    eq EmptyStmt.Aexps() = new LinkedList();
+	eq ContinueStmt.Aexps() = new LinkedList();
     eq Block.Aexps() {
-        Set<Expr> ret = new HashSet();
+        LinkedList<Expr> ret = new LinkedList();
         for (int i=0; i < getNumSList() ; i++){
             ret.addAll(getSList(i).Aexps());
         }
@@ -21,7 +21,7 @@ aspect AExp {
     }
 
 	eq IfStmt.Aexps() {
-        Set<Expr> ret = getCondition().Aexps();
+        LinkedList<Expr> ret = getCondition().Aexps();
         ret.addAll(getThen().Aexps());
         ret.addAll(getElse().Aexps());
         return ret;
@@ -29,13 +29,13 @@ aspect AExp {
 		}
 
     eq WhileStmt.Aexps() {
-        Set<Expr> ret = getCondition().Aexps();
+        LinkedList<Expr> ret = getCondition().Aexps();
         ret.addAll(getStmt().Aexps());
         return ret;
 
     }
 	eq ForStmt.Aexps() {
-		Set<Expr> ret = new HashSet();
+		LinkedList<Expr> ret = new LinkedList();
 		for (int i =0; i < getNumInitStmt(); i++) {
 			ret.addAll(getInitStmt(i).Aexps());
 		}
@@ -46,64 +46,59 @@ aspect AExp {
 		return ret;
 	}
 	eq LabeledStmt.Aexps() {
-		Set<Expr> ret = new HashSet();
+		LinkedList<Expr> ret = new LinkedList();
 		ret.addAll(getStmt().Aexps());
 		return ret;
 	}
 	eq DoStmt.Aexps() {
-		Set<Expr> ret = getCondition().Aexps();
+		LinkedList<Expr> ret = getCondition().Aexps();
 		ret.addAll(getStmt().Aexps());
 		return ret;
 	}
 
-    syn Set<Expr> Expr.Aexps();
+    syn LinkedList<Expr> Expr.Aexps();
 
-    syn Set<Expr> AssignExpr.Aexps();
+    syn LinkedList<Expr> AssignExpr.Aexps();
     eq AssignExpr.Aexps() {
-        Set<Expr> ret = new HashSet();
+        LinkedList<Expr> ret = new LinkedList();
         ret.addAll(getDest().Aexps());
         ret.addAll(getSource().Aexps());
         return ret;
     }
 
-	syn Set<Expr> Binary.Aexps();
+	syn LinkedList<Expr> Binary.Aexps();
         eq Binary.Aexps(){
-			Set<Expr> ret = new HashSet();
+			LinkedList<Expr> ret = new LinkedList();
 	        ret.addAll(getLeftOperand().Aexps());
 	        ret.addAll(getRightOperand().Aexps());
 	        return ret;
     }
 	//eq ArithmeticExpr.Aexps() = getBinary.Aexps();
-	syn Set<Expr> Unary.Aexps() = getOperand().Aexps();
+	syn LinkedList<Expr> Unary.Aexps() = getOperand().Aexps();
 
-	syn Set<Expr> PrimaryExpr.Aexps();
-	eq Literal.Aexps()  = new HashSet();
+	syn LinkedList<Expr> PrimaryExpr.Aexps();
+	eq Literal.Aexps()  = new LinkedList();
 
-	syn Set<Expr> Access.Aexps() = new HashSet();
+	syn LinkedList<Expr> Access.Aexps() = new LinkedList();
 		eq VarDeclStmt.Aexps() = getTypeAccess().Aexps();
 
-	syn Set<Expr> ConditionalExpr.Aexps();
+	syn LinkedList<Expr> ConditionalExpr.Aexps();
 		eq ConditionalExpr.Aexps() {
-			Set<Expr> ret = getCondition().Aexps();
+			LinkedList<Expr> ret = getCondition().Aexps();
 			ret.addAll(getTrueExpr().Aexps());
 			ret.addAll(getFalseExpr().Aexps());
 			return ret;
 		}
 
 		/** The set of non-trivial expressions in the program. */
-    syn Set<Expr> Program.AexpStar();
+    syn LinkedList<Expr> Program.AexpStar();
     eq Program.AexpStar() = getStmt().Aexps();
 
-    inh Set<Expr> Stmt.AexpStar();
+    inh LinkedList<Expr> Stmt.AexpStar();
     eq Program.getStmt().AexpStar() = getStmt().Aexps();
 
-    inh Set<Expr> Block.AexpStar();
+   // inh LinkedList<Expr> Block.AexpStar();
                                 
-/*public boolean Expr.equals(Object oth) {
-       if (oth == null || !(oth instanceof Expr)) { return false; }
-       Expr e = (Expr) oth;
-       return unparse().equals(e.unparse());
-    }*/
 
 }
 

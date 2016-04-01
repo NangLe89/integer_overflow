@@ -4,93 +4,96 @@ import java.util.*;
 
 
 aspect AE {   
-	syn Set<Expr> Stmt.killAE(Set<Expr> current);
+	syn Set<Expr> Expr.killAE(Set<Expr> current) = new HashSet();
     eq AssignExpr.killAE(Set<Expr> current) {
-    Set<Expr> ret = new HashSet();
-    String assigned_var = getDest();
-    for (Expr exp : current)
-    {
-        if (exp.FV().contains(assigned_var))
-        ret.add(exp);
-    }
-    return ret;
-    }
-
-    eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
-    eq Binary.killAE(Set<Expr> current) = new HashSet();
-
-    syn Set<Expr> Stmt.genAE();
-    eq AssignExpr.genAE() {
 		Set<Expr> ret = new HashSet();
-		Expr exp = getExpr();
-		if (exp.nontrivial()
-		&& !(exp.FV().contains(getDest()))) {
+		Expr assigned_var = getDest();
+		for (Expr exp : current)
+		{
+			if (exp.FV().contains(assigned_var))
 			ret.add(exp);
 		}
 		return ret;
     }
 
-    eq BreakStmt.genAE() = new HashSet();
-    eq Binary.genAE() {
-		Expr e = getExpr();
-		if (e.nontrivial()) {
-			HashSet h = new HashSet();
-			h.add(e);
-			return h;
-		} else {
-			HashSet a = new HashSet();
-			return a;
+	syn Set<Expr> Stmt.killAE(Set<Expr> current) = new HashSet();
+	eq BreakStmt.killAE(Set<Expr> current) = new HashSet();
+	eq ExprStmt.killAE(Set<Expr> current) = new HashSet();
+
+
+    syn Set<Expr> Expr.genAE() = new HashSet();
+    eq AssignExpr.genAE() {
+		Set<Expr> ret = new HashSet();
+		Expr exp = getDest();
+		if (exp.FV().contains(getDest())) {
+			ret.add(exp);
 		}
+		return ret;
     }
 
-    syn Set<Expr> Block.AEentry() circular [AexpStar()];
-    eq Block.AEentry() {
-        Set<Expr> ret;
-        if (getLabel().equals(Stmt.init())) {
-            ret = new HashSet();
-        } else {
-            Set<Set<Expr>> inputs = RunAE.map(
-            new RunAE.Fun<Label, Set<Expr>>() {
-                public Set<Expr> run(Label l) {
-                    Block b = l.itsBlock();
-                    return b.AEexit();
-                }
-        },
-        inFlows());
-        ret = new RunAE.intersect(inputs);
-        }
-        return ret;
+	syn Set<Expr> Stmt.genAE() = new HashSet();
+	eq BreakStmt.genAE() = new HashSet();
+	eq ExprStmt.genAE() {
+		Expr e = getExpr();
+		HashSet h = new HashSet();
+		h.add(e);
+		return h;
 	}
-
-	syn Set<Expr> Block.AEexit() circular [AexpStar()];
-		eq Block.AEexit() {
-			Set<Expr> ret = new HashSet(); // start with a fresh set!
-			ret.addAll(this.AEentry());
-			ret.removeAll(this.killAE(ret));
-			ret.addAll(this.genAE());
-			return ret;
-	}
-}
-public class RunAE{
-	public static <T,List> Set<T> map(Fun<List,T> f, Set<List> args) {
-			Set<T> ret = new HashSet<T>();
-			for (List e : args) {
-				ret.add(f.run(e));
-			}
-			return ret;
-	}
-	public static <T> Set<T> intersect(Set<Set<T>> sets) {
-			Set<T> ret = new HashSet<T>();
-			boolean started = false;
-			for (Set<T> s : sets) {
-				if (!started) {
-					ret.addAll(s);
-					started = true;
-				} else {
-					ret.retainAll(s);
+	syn Set<Expr> Stmt.AEentry() circular [AexpStar()];
+	eq Stmt.AEentry() {
+		Set<Expr> ret;
+		if (getl().equals(progInitLabel())) {
+			ret = new HashSet();
+		} else {
+			Set<Set<Expr>> inputs = map(
+			new Fun<Label, Set<Expr>>() {
+				public Set<Expr> run(Label l) {
+					Block b = l.itsBlock();
+					return b.AEexit();
 				}
+			},
+			getStmt().flows());
+			ret = new intersect(inputs);
 			}
 			return ret;
-	}
+		}
 }
+
+	//syn Set<Expr> Stmt.AEexit() circular [AexpStar()];
+//		eq Stmt.AEexit() {
+//			Set<Expr> ret = new HashSet(); // start with a fresh set!
+//			ret.addAll(this.AEentry());
+//			ret.removeAll(this.killAE(ret));
+//			ret.addAll(this.genAE());
+//			return ret;
+//	}
+//}
+//public class map{
+	//public static <T,L> Set<T> map(Fun<L,T> f, Set<L> args) {
+		//	Set<T> ret = new HashSet<T>();
+	//		for (L e : args) {
+	//			ret.add(f.run(e));
+	//		}
+	//		return ret;
+//	}
+//}
+//public class intersect {
+//	public static <T> Set<T> intersect(Set<Set<T>> sets) {
+	//		Set<T> ret = new HashSet<T>();
+		//	boolean started = false;
+	//		for (Set<T> s : sets) {
+	//			if (!started) {
+	//				ret.addAll(s);
+	//				started = true;
+	//			} else {
+	//				ret.retainAll(s);
+	//			}
+	//		}
+	//		return ret;
+//	}
+//}
+//public class Fun{
+//	public interface Fun<L,T> {
+//			T run(L x);
+//		}
 */

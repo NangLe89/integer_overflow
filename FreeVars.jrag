@@ -1,0 +1,43 @@
+// Free Variables analysis
+
+import java.util.Set;
+
+aspect FreeVars {
+
+	syn Set<String> Program.FV() = getStmt().FV();
+	syn Set<String> Stmt.FV() = new HashSet();
+	eq ExprStmt.FV() = getExpr().FV();
+	eq BreakStmt.FV() = new HashSet();
+	eq LabeledStmt.FV() { 
+		HashSet h = new HashSet();
+		h.add(getIdentifier());
+		Set<String> ret = h;
+		ret.addAll(getStmt().FV());
+		return ret;
+	}
+	eq IfStmt.FV() {
+	   Set<String> ret = getCondition().FV();
+	   ret.addAll(getThen().FV());
+	   ret.addAll(getElse().FV());
+	   return ret;
+	}
+	eq WhileStmt.FV() {
+	   Set<String> ret = getCondition().FV();
+	   ret.addAll(getStmt().FV());
+	   return ret;
+	}
+	eq Block.FV() {
+	   Set<String> ret = new HashSet();
+	   for (int i = 0; i < getNumSList(); i++) {
+	      ret.addAll(getSList(i).FV());
+	   }
+	   return ret;
+	}
+	
+	syn Set<String> Expr.FV() = new HashSet();
+	eq AssignExpr.FV() {
+	   Set<String> ret = getDest().FV();
+	   ret.addAll(getSource().FV());
+	   return ret;
+	}
+}

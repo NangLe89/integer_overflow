@@ -1,0 +1,30 @@
+
+import java.util.*;
+
+aspect ProgramGlobalAttributes {
+
+	// Broadcast progLabels (Lab*) to all children of the statement in the program.
+	eq Program.getStmt().progLabels() = getStmt().Label();
+	inh Integer Stmt.progLabels();
+	
+	// Broadcast progInitLabel (init(S*)) to all children of the program.
+	eq Program.getStmt().progInitLabel() = getStmt().init();
+	inh Integer Stmt.progInitLabel();
+
+	// Broadcast progFinals (final(S*)) to all children of the program.
+	eq Program.getStmt().progFinals() = getStmt().finals();
+	inh Set<Integer> Stmt.progFinals();
+	
+	// Broadcast progFV (FV(S*)) to all children in the program.
+	eq Program.getStmt().progFV() = getStmt().FV();
+	inh Set<String> Stmt.progFV();
+
+	// Broadcast progAST to all children in the program.
+	eq Program.getStmt().progAST() = this;
+	inh Program Stmt.progAST();
+	inh Program Expr.progAST();
+
+	// Broadcast progCFG to all children in the program.
+//	eq Program.getStmt().progCFG() = getStmt().flows();
+	//inh FlowGraph<Label,Label> Stmt.progCFG();
+}
