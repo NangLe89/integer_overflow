@@ -39,24 +39,24 @@ aspect AE {
 		h.add(e);
 		return h;
 	}
-	syn Set<Expr> Stmt.AEentry() circular [AexpStar()];
-	eq Stmt.AEentry() {
-		Set<Expr> ret;
-		if (getl().equals(progInitLabel())) {
-			ret = new HashSet();
-		} else {
-			Set<Set<Expr>> inputs = map(
-			new Fun<Label, Set<Expr>>() {
-				public Set<Expr> run(Label l) {
-					Block b = l.itsBlock();
-					return b.AEexit();
-				}
-			},
-			getStmt().flows());
-			ret = new intersect(inputs);
-			}
-			return ret;
-		}
+//	syn Set<Expr> Stmt.AEentry() circular [AexpStar()];
+//	eq Stmt.AEentry() {
+//		Set<Expr> ret;
+//		if (getl().equals(progInitLabel())) {
+//			ret = new HashSet();
+//		} else {
+//			Set<Set<Expr>> inputs = map(
+//			new Fun<Label, Set<Expr>>() {
+//				public Set<Expr> run(Label l) {
+//					Block b = l.itsBlock();
+//					return b.AEexit();
+//				}
+//			},
+//			inflows());
+//			ret = new intersect(inputs);
+//			}
+//			return ret;
+//		}
 }
 
 	//syn Set<Expr> Stmt.AEexit() circular [AexpStar()];

@@ -3,7 +3,7 @@
   "break"           { return sym(Terminals.BREAK); }
 //  "case"            { return sym(Terminals.CASE); }
 //  "const"           { return sym(Terminals.EOF); }
-  "continue"        { return sym(Terminals.CONTINUE); }
+//  "continue"        { return sym(Terminals.CONTINUE); }
 //  "default"         { return sym(Terminals.DEFAULT); }
   "do"              { return sym(Terminals.DO); }
   "else"            { return sym(Terminals.ELSE); }
@@ -16,7 +16,6 @@
   "byte"           { return sym(Terminals.BYTE); }
   "short"           { return sym(Terminals.SHORT); }
   "int"           { return sym(Terminals.INT); }
-  "long"           { return sym(Terminals.LONG); }
   "char"           { return sym(Terminals.CHAR); }
 }
 

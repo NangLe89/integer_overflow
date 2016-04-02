@@ -24,10 +24,10 @@ Digit = 0 | {NonZeroDigit}
 NonZeroDigit = [1-9]
 
 /* 3.10.2 Floating-Point Literals */
-FloatingPointLiteral = {Digits} \. {Digits}? {ExponentPart}?
-                     | \. {Digits} {ExponentPart}?
-                     | {Digits} {ExponentPart}
-ExponentPart = [eE] [+-]? [0-9]+
+//FloatingPointLiteral = {Digits} \. {Digits}? {ExponentPart}?
+ //                    | \. {Digits} {ExponentPart}?
+ //                    | {Digits} {ExponentPart}
+//ExponentPart = [eE] [+-]? [0-9]+
 
 /* 3.10.4 Character Literals */
 SingleCharacter = [^\r\n\'\\]

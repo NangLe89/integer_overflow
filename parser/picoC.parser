@@ -8,7 +8,7 @@ import AST.*;
 :};
 
 %left LPAREN, RPAREN, POSTINCDEC;
-%right PLUSPLUS, MINUSMINUS, NOT, COMP, UNARY;
+%right PLUSPLUS, MINUSMINUS;
 %left MULT, DIV, MOD;
 %left PLUS, MINUS;
 %left LSHIFT, RSHIFT;
@@ -19,7 +19,7 @@ import AST.*;
 %left OR;
 %left ANDAND;
 %left OROR;
-%right QUESTION, COLON;
+%right COLON;
 %right EQ, PLUSEQ, MINUSEQ, MULTEQ, DIVEQ, MODEQ, ANDEQ,
 		XOREQ, OREQ, LSHIFTEQ, RSHIFTEQ;
 
@@ -31,7 +31,7 @@ Program goal =
   block			{: return new Program(block); :}
   ;
 Stmt block =
-    LBRACE block_statements.list? RBRACE {: return new Block(l++, list); :}
+    LBRACE block_statements.list? RBRACE {: return new CompoundS(l++, list); :}
   ;
 List block_statements =
     statement.b                    {: return new List().add(b); :}
@@ -64,7 +64,6 @@ Stmt statement =
   | empty_statement
   | do_statement
   | break_statement
-  | continue_statement
   | local_variable_declaration_statement
   | goto_statement
   ;
@@ -80,12 +79,10 @@ List for_update =
   ;
 List statement_expression_list =
     statement_expression.e                                   {: return new List().add(e); :}
-  | statement_expression_list.l COMMA statement_expression.e {: return l.add(e); :}
+  | statement_expression_list.sl COMMA statement_expression.e {: return sl.add(e); :}
   ;
 ExprStmt statement_expression =
     assignment.a                               {: return new ExprStmt(l++, a); :}
-  | preincrement_expression.e                  {: return new ExprStmt(l++, e); :}
-  | predecrement_expression.e                  {: return new ExprStmt(l++, e); :}
   | postincrement_expression.e                 {: return new ExprStmt(l++, e); :}
   | postdecrement_expression.e                 {: return new ExprStmt(l++, e); :}
   ;
@@ -102,10 +99,6 @@ GotoStmt goto_statement =
   GOTO IDENTIFIER.id SEMICOLON		{: return new GotoStmt(l++, id); :}
   ;
 
-ContinueStmt continue_statement =
-    CONTINUE IDENTIFIER.id SEMICOLON  {: return new ContinueStmt(l++, id); :}
-//  | CONTINUE               SEMICOLON  {: return new ContinueStmt(l++, ""); :}
-  ;
 BreakStmt break_statement =
    BREAK IDENTIFIER.id SEMICOLON     {: return new BreakStmt(l++, id); :}
  // |BREAK               SEMICOLON     {: return new BreakStmt(l++, ""); :}
@@ -123,8 +116,8 @@ EmptyStmt empty_statement =
 
 Expr expression = assignment_expression;
 Expr assignment_expression =
-    conditional_expression
-  | assignment
+   assignment
+   |conditional_or_expression
   ;
 Expr assignment =
     postfix_expression.dest EQ assignment_expression.source {: return new AssignSimpleExpr(dest, source); :}
@@ -147,9 +140,6 @@ Expr postfix_expression =
   ;
 Expr literal =
     INTEGER_LITERAL        {: return new IntegerLiteral(INTEGER_LITERAL); :}
-  | LONG_LITERAL           {: return new LongLiteral(LONG_LITERAL); :}
-  | FLOATING_POINT_LITERAL {: return new FloatingPointLiteral(FLOATING_POINT_LITERAL); :}
-  | DOUBLE_LITERAL         {: return new DoubleLiteral(DOUBLE_LITERAL); :}
   | CHARACTER_LITERAL      {: return new CharacterLiteral(CHARACTER_LITERAL); :}
   | STRING_LITERAL         {: return new StringLiteral(STRING_LITERAL); :}
   ;
@@ -167,10 +157,10 @@ Access simple_name =
     IDENTIFIER              {: return new ParseName(IDENTIFIER); :}
   ;
 Expr multiplicative_expression =
-    unary_expression
-  | multiplicative_expression.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
-  | multiplicative_expression.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
-  | multiplicative_expression.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+    postfix_expression
+  | multiplicative_expression.e1 MULT postfix_expression.e2  {: return new MulExpr(e1, e2); :}
+  | multiplicative_expression.e1 DIV postfix_expression.e2   {: return new DivExpr(e1, e2); :}
+  | multiplicative_expression.e1 MOD postfix_expression.e2   {: return new ModExpr(e1, e2); :}
   ;
 Expr additive_expression =
     multiplicative_expression @BOTTOM
@@ -183,7 +173,7 @@ Expr shift_expression =
   | shift_expression.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
   ;
 Expr relational_expression =
-    shift_expression 
+    additive_expression 
   | relational_expression.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
   | relational_expression.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
   | relational_expression.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
@@ -214,28 +204,11 @@ Expr conditional_or_expression =
     conditional_and_expression @BOTTOM
   | conditional_or_expression.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
   ;
-Expr conditional_expression =
-    conditional_or_expression @BOTTOM
-  | conditional_or_expression.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
-  ;
-Expr unary_expression =
-    preincrement_expression
-  | predecrement_expression
-  | PLUS unary_expression.e    @UNARY             {: return new PlusExpr(e); :}
-  | MINUS unary_expression.e   @UNARY            {: return new MinusExpr(e); :}
-  | unary_expression_not_plus_minus
-  ;
-Expr preincrement_expression =
-    PLUSPLUS unary_expression.e                {: return new PreIncExpr(e); :}
-  ;
-Expr predecrement_expression =
-    MINUSMINUS unary_expression.e              {: return new PreDecExpr(e); :}
-  ;
-Expr unary_expression_not_plus_minus =
-    postfix_expression @BOTTOM
-  | COMP unary_expression.e                    {: return new BitNotExpr(e); :}
-  | NOT unary_expression.e                     {: return new LogNotExpr(e); :}
-  ;
+//Expr conditional_expression =
+//    conditional_or_expression @BOTTOM
+ // | conditional_or_expression.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+//  ;
+
 
 
 

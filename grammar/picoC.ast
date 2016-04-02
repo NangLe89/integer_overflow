@@ -5,20 +5,19 @@ Program ::= Stmt;
 abstract Stmt ::= <l:int>;
 IfStmt : Stmt ::= Condition:Expr Then:Stmt Else:Stmt;
 ExprStmt : Stmt ::= Expr;
-//ReturnStmt : Stmt ::= [Result:Expr];
-ContinueStmt : Stmt ::= <Identifier:String>;
 BreakStmt : Stmt ::= <Identifier:String>;
 EmptyStmt : Stmt;
-Block : Stmt ::= SList:Stmt*;
+CompoundS : Stmt ::= SList:Stmt*;
 VarDeclStmt : Stmt ::= TypeAccess:Access <ID:String>;
 GotoStmt : Stmt ::= <Identifier:String>;
 
-// Branch Target Statement: a statement that can be reached by break or continue
-abstract BranchTargetStmt : Stmt; 
-ForStmt : BranchTargetStmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* Stmt;
-WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
-LabeledStmt : BranchTargetStmt ::= <Identifier> Stmt;
-DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
+ForStmt : Stmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* Stmt;
+WhileStmt : Stmt ::= Condition:Expr Stmt;
+LabeledStmt : Stmt ::= <Identifier:String> Stmt;
+DoStmt : Stmt ::= Stmt Condition:Expr;
+
+//abstract Label ;
+//NumLabel:Label ::= <Num>;
 
 abstract Expr;
 
@@ -48,14 +47,12 @@ AssignOrExpr : AssignBitwiseExpr ;
 // Binary expressions, i.e. <LeftOperand> + <RightOperand>, <LeftOperand> && <RightOperand>, etc.
 abstract Binary : Expr ::= LeftOperand:Expr RightOperand:Expr;
 
-abstract ArithmeticExpr : Binary;
-abstract MultiplicativeExpr : ArithmeticExpr;
-MulExpr : MultiplicativeExpr ;
-DivExpr : MultiplicativeExpr ;
-ModExpr : MultiplicativeExpr ;
-abstract AdditiveExpr : ArithmeticExpr;
-AddExpr : AdditiveExpr ;
-SubExpr : AdditiveExpr ;
+abstract ArithmeticExpr : Expr ::= LeftOperand:Expr RightOperand:Expr;
+MulExpr : ArithmeticExpr ;
+DivExpr : ArithmeticExpr ;
+ModExpr : ArithmeticExpr ;
+AddExpr : ArithmeticExpr ;
+SubExpr : ArithmeticExpr ;
 
 abstract ShiftExpr : Binary;
 LShiftExpr : ShiftExpr ;
@@ -84,12 +81,6 @@ OrLogicalExpr : LogicalExpr ;
 
 // Unary expressions: e.g.<operand>++, --<operand>, -<operand>, !<operand>, etc.
 abstract Unary : Expr ::= Operand:Expr;
-BitNotExpr : Unary ;
-LogNotExpr : Unary ;
-MinusExpr : Unary ;
-PlusExpr : Unary ;
-PreIncExpr : Unary ;
-PreDecExpr : Unary ;
 abstract PostfixExpr : Unary;
 PostIncExpr : PostfixExpr ;
 PostDecExpr : PostfixExpr ;
@@ -97,14 +88,10 @@ PostDecExpr : PostfixExpr ;
 // End unary expressions
 
 //Literals, i.e. numbers, variable names, strings, etc.
-abstract PrimaryExpr : Expr;
-abstract Literal : PrimaryExpr ::= <LITERAL:String>;
+abstract Literal : Expr ::= <LITERAL:String>;
 CharacterLiteral : Literal ;
 StringLiteral : Literal ;
 IntegerLiteral : Literal ;
-LongLiteral : Literal ;
-FloatingPointLiteral : Literal ;
-DoubleLiteral : Literal ;
 
 // Access expressions (whatever that means)
 abstract Access : Expr ::= <ID:String>;
@@ -113,4 +100,4 @@ PrimitiveTypeAccess : TypeAccess;
 ParseName : Access;
 
 // Last but not least, the ternary operator.
-ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr FalseExpr:Expr;
+//ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr FalseExpr:Expr;

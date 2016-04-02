@@ -3,9 +3,9 @@
   "="                            { return sym(Terminals.EQ); }
   ">"                            { return sym(Terminals.GT); }
   "<"                            { return sym(Terminals.LT); }
-  "!"                            { return sym(Terminals.NOT); }
-  "~"                            { return sym(Terminals.COMP); }
-  "?"                            { return sym(Terminals.QUESTION); }
+//  "!"                            { return sym(Terminals.NOT); }
+ // "~"                            { return sym(Terminals.COMP); }
+ // "?"                            { return sym(Terminals.QUESTION); }
   ":"                            { return sym(Terminals.COLON); }
   "=="                           { return sym(Terminals.EQEQ); }
   "<="                           { return sym(Terminals.LTEQ); }

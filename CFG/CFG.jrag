@@ -1,33 +1,89 @@
 import java.util.*;
 
 aspect CFG{
+	syn Integer Program.Label();
+	eq Program.Label() = getStmt().Label();
   syn Integer Stmt.Label() = new Integer(getl());
 
   syn Integer Stmt.init() = Label();
- // eq BreakStmt.init() = new HashSet();
-  eq Block.init() = getSList(0).init();
+  eq CompoundS.init() = getSList(0).init();
   eq ForStmt.init() = getInitStmt(0).init();
   eq DoStmt.init() = getStmt().init();
+
 
   syn Set<Integer> Stmt.finals(){
     Set<Integer> ret = new HashSet<Integer>();
     ret.add(Label());
     return ret;
   }
-  eq BreakStmt.finals() = new HashSet();
   eq IfStmt.finals(){
     Set<Integer> ret = new HashSet<Integer>();
     ret.addAll(getThen().finals());
     ret.addAll(getElse().finals());
     return ret;
   }
-  eq Block.finals() = getSList(getNumSList()-1).finals(); 
+  eq CompoundS.finals() = getSList(getNumSList()-1).finals(); 
+
+   public interface Block {
+		Set<Integer> inFlows();
+		Set<Integer> outFlows();
+		Integer Label();
+	}
+
+	inh Set<Integer> Stmt.inFlows();
+	eq Program.getStmt().inFlows() = new HashSet();
+	eq IfStmt.getThen().inFlows() {
+	    HashSet h = new HashSet();
+		h.add(Label());
+		return h;
+	}
+	eq IfStmt.getElse().inFlows() {
+	     HashSet h = new HashSet();
+		h.add(Label());
+		return h;
+	}
+	eq WhileStmt.getStmt().inFlows() {
+	     HashSet h = new HashSet();
+		h.add(Label());
+		return h;
+	}
+	eq CompoundS.getSList(int index).inFlows() {
+		if (index == 0) {
+			return inFlows();
+		} else { 
+			return getSList(index-1).finals();
+		}
+	}
+	
+	//inh Set<Label> Conditon.inFlows();
+	eq IfStmt.getCondition().inFlows() = this.inFlows();
+	eq WhileStmt.getCondition().inFlows() {
+		Set<Integer> ins = this.inFlows();
+		ins.addAll(getStmt().finals());
+		return ins;
+	}
+	inh Stmt Stmt.next();
+	eq CompoundS.getSList(int index).next() {
+		if (index == getNumSList()-1) {
+			return next();
+		} else {
+			return getSList(index+1);
+		}
+	}
+	eq Program.getStmt().next() = null;
+	eq IfStmt.getThen().next() = next();
+	eq IfStmt.getElse().next() = next();
+	eq WhileStmt.getStmt().next() = this;
+	eq ForStmt.getStmt().next() = this;
+//BreakStmt implements Block;
 
   syn Set<Stmt> Stmt.blocks(){
     Set<Stmt> ret = new HashSet<Stmt>();
     ret.add(this);
     return ret;
   }
+  //eq BreakStmt.blocks() {
+//	Set<
   eq IfStmt.blocks(){
     Set<Stmt> ret = new HashSet<Stmt>();
     ret.add(this);
@@ -35,7 +91,7 @@ aspect CFG{
     ret.addAll(getElse().blocks());
     return ret;
   }
-  eq Block.blocks(){
+  eq CompoundS.blocks(){
     Set<Stmt> ret = new HashSet<Stmt>();
     ret.add(this);
     for(Stmt s : getSLists())
@@ -71,7 +127,7 @@ aspect CFG{
       ret.add(s.Label());
     return ret;
   }  
-
+ 
   syn Set<Pair> Stmt.flow() = new HashSet<Pair>();
   eq IfStmt.flow(){
     Set<Pair> ret = new HashSet<Pair>();
@@ -81,7 +137,7 @@ aspect CFG{
     ret.add(new Pair(Label(), getElse().init()));
     return ret;
   } 
-  eq Block.flow(){
+  eq CompoundS.flow(){
     Set<Pair> ret = new HashSet<Pair>();
     for(Stmt s : getSLists())
       ret.addAll(s.flow());

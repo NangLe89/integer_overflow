@@ -2,20 +2,20 @@
 <YYINITIAL> {
   /* 3.10.1 Integer Literals */
   {DecimalNumeral}               { return sym(Terminals.INTEGER_LITERAL); }
-  {DecimalNumeral} [lL]          { return sym(Terminals.LONG_LITERAL); }
+//  {DecimalNumeral} [lL]          { return sym(Terminals.LONG_LITERAL); }
 
   {HexNumeral}                   { return sym(Terminals.INTEGER_LITERAL); }
-  {HexNumeral} [lL]              { return sym(Terminals.LONG_LITERAL); }
+ // {HexNumeral} [lL]              { return sym(Terminals.LONG_LITERAL); }
 
   {OctalNumeral}                 { return sym(Terminals.INTEGER_LITERAL); }
-  {OctalNumeral} [lL]            { return sym(Terminals.LONG_LITERAL); }
+ // {OctalNumeral} [lL]            { return sym(Terminals.LONG_LITERAL); }
 
   /* 3.10.2 Floating-Point Literals */
-  {FloatingPointLiteral} [fF]    { return sym(Terminals.FLOATING_POINT_LITERAL); }
-  {FloatingPointLiteral} [dD]    { return sym(Terminals.DOUBLE_LITERAL); }
-  {FloatingPointLiteral}         { return sym(Terminals.DOUBLE_LITERAL); }
-  [0-9]+ {ExponentPart}? [fF]    { return sym(Terminals.FLOATING_POINT_LITERAL); }
-  [0-9]+ {ExponentPart}? [dD]    { return sym(Terminals.DOUBLE_LITERAL); }
+//  {FloatingPointLiteral} [fF]    { return sym(Terminals.FLOATING_POINT_LITERAL); }
+//  {FloatingPointLiteral} [dD]    { return sym(Terminals.DOUBLE_LITERAL); }
+//  {FloatingPointLiteral}         { return sym(Terminals.DOUBLE_LITERAL); }
+//  [0-9]+ {ExponentPart}? [fF]    { return sym(Terminals.FLOATING_POINT_LITERAL); }
+//  [0-9]+ {ExponentPart}? [dD]    { return sym(Terminals.DOUBLE_LITERAL); }
 
 
   /* 3.10.4 Character Literals */
